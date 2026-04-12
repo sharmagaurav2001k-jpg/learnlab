@@ -1,0 +1,2515 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LearnLab — Your Personal Learning Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ─────────────────────────────────────── */
+:root{
+  --bg:#f0edfa; --bg2:#e8e4f7;
+  --surface:#ffffff; --surface2:#f9f8fe;
+  --border:#e2ddf5;
+  --ink:#1a1535; --ink2:#5b5480; --ink3:#9892b8;
+  --accent:#7c5cbf; --accent2:#a67ff0; --accent-bg:#f0eaff;
+  --coral:#ff7d6b; --mint:#3ecfb2; --gold:#f5a623; --sky:#4fb3f6; --rose:#f06292;
+  --shadow-sm:0 2px 8px rgba(100,80,180,.08);
+  --shadow-md:0 8px 32px rgba(100,80,180,.13);
+  --shadow-lg:0 20px 60px rgba(100,80,180,.18);
+  --r:18px; --rs:10px; --rp:50px;
+  --tr:all .28s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg:#0e0c1a; --bg2:#16132a;
+  --surface:#1e1a32; --surface2:#252040;
+  --border:#2e2850;
+  --ink:#f0eeff; --ink2:#b0a8d8; --ink3:#6d66a0;
+  --accent:#a67ff0; --accent2:#c4a8ff; --accent-bg:#2a2048;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.3);
+  --shadow-md:0 8px 32px rgba(0,0,0,.4);
+  --shadow-lg:0 20px 60px rgba(0,0,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+button{cursor:pointer;border:none;background:none;font-family:inherit}
+input,textarea,select{font-family:inherit}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── BG ORBS ────────────────────────────────────── */
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.32;animation:drift 18s ease-in-out infinite alternate}
+[data-theme="dark"] .orb{opacity:.12}
+.o1{width:520px;height:520px;background:radial-gradient(circle,#c4a8ff,#7c5cbf);top:-160px;left:-120px;animation-delay:0s}
+.o2{width:420px;height:420px;background:radial-gradient(circle,#3ecfb2,#4fb3f6);top:35%;right:-160px;animation-delay:-7s}
+.o3{width:360px;height:360px;background:radial-gradient(circle,#ff7d6b,#f5a623);bottom:-100px;left:32%;animation-delay:-13s}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,28px) scale(1.08)}}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+.app{position:relative;z-index:1}
+
+/* ── NAVBAR ─────────────────────────────────────── */
+.navbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:68px;
+  background:rgba(255,255,255,.78);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);transition:var(--tr);
+}
+[data-theme="dark"] .navbar{background:rgba(14,12,26,.82)}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--accent);cursor:pointer}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:1.1rem}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{padding:8px 18px;border-radius:var(--rp);font-size:.88rem;font-weight:500;color:var(--ink2);transition:var(--tr)}
+.nav-tab:hover{background:var(--accent-bg);color:var(--accent)}
+.nav-tab.active{background:var(--accent);color:#fff}
+.nav-right{display:flex;align-items:center;gap:12px}
+.dark-toggle{width:44px;height:24px;border-radius:12px;background:var(--border);position:relative;cursor:pointer;transition:var(--tr)}
+.dark-toggle.on{background:var(--accent)}
+.dark-toggle-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:white;transition:var(--tr);display:grid;place-items:center;font-size:.6rem}
+.dark-toggle.on .dark-toggle-knob{left:23px}
+.notif-btn{width:38px;height:38px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;font-size:1rem;color:var(--ink2);transition:var(--tr)}
+.notif-btn:hover{background:var(--accent-bg);color:var(--accent)}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--coral));display:grid;place-items:center;font-size:.9rem;color:white;font-weight:600}
+
+/* ── PAGE SYSTEM ────────────────────────────────── */
+.page{display:none}
+.page.active{display:block;animation:fadeUp .38s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HERO ───────────────────────────────────────── */
+.hero{text-align:center;padding:60px 24px 36px;max-width:700px;margin:0 auto}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:6px;background:var(--accent-bg);color:var(--accent);padding:6px 16px;border-radius:var(--rp);font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px;animation:fadeUp .5s .1s both}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.1rem,5vw,3.3rem);line-height:1.15;margin-bottom:14px;animation:fadeUp .5s .2s both}
+.hero h1 span{color:var(--accent)}
+.hero p{font-size:1rem;color:var(--ink2);line-height:1.7;margin-bottom:34px;animation:fadeUp .5s .3s both}
+
+/* ── SEARCH ─────────────────────────────────────── */
+.search-wrap{position:relative;max-width:580px;margin:0 auto 14px;animation:fadeUp .5s .4s both}
+.search-bar{width:100%;padding:16px 52px 16px 52px;border-radius:var(--rp);border:2px solid var(--border);background:var(--surface);font-size:1rem;color:var(--ink);box-shadow:var(--shadow-md);outline:none;transition:var(--tr)}
+.search-bar:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(124,92,191,.12),var(--shadow-md)}
+.search-bar::placeholder{color:var(--ink3)}
+.s-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:1.1rem;color:var(--ink3);pointer-events:none}
+.s-clear{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--ink2);display:none;place-items:center;font-size:.78rem;cursor:pointer;transition:var(--tr)}
+.s-clear:hover{background:var(--accent);color:white}
+.s-clear.show{display:grid}
+.quote-bar{max-width:580px;margin:0 auto 44px;text-align:center;color:var(--ink3);font-size:.82rem;font-style:italic;animation:fadeUp .5s .5s both;min-height:20px;transition:opacity .4s}
+
+/* ── SECTION ────────────────────────────────────── */
+.section{max-width:1200px;margin:0 auto;padding:0 24px 60px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.section-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700}
+.section-title span{color:var(--accent)}
+.see-all{font-size:.85rem;font-weight:500;color:var(--accent);padding:6px 14px;border-radius:var(--rp);border:1.5px solid var(--accent);transition:var(--tr);cursor:pointer}
+.see-all:hover{background:var(--accent);color:white}
+
+/* ── CATEGORY CARDS (homepage) ──────────────────── */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px}
+.cat-card{
+  background:var(--surface);border-radius:var(--r);padding:24px 20px;
+  cursor:pointer;border:1.5px solid var(--border);box-shadow:var(--shadow-sm);
+  transition:var(--tr);position:relative;overflow:hidden;
+  animation:fadeUp .5s both;
+}
+.cat-card::after{content:'';position:absolute;inset:0;background:var(--cc,var(--accent));opacity:0;transition:var(--tr)}
+.cat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);border-color:var(--cc,var(--accent))}
+.cat-card:hover::after{opacity:.06}
+.cat-card:active{transform:scale(.97)}
+.cat-emoji{font-size:2rem;margin-bottom:12px;display:block}
+.cat-name{font-weight:600;font-size:1rem;margin-bottom:4px}
+.cat-count{font-size:.78rem;color:var(--ink3)}
+.cat-arrow{position:absolute;bottom:14px;right:14px;width:28px;height:28px;border-radius:50%;background:var(--cc,var(--accent));color:white;display:grid;place-items:center;font-size:.75rem;opacity:0;transition:var(--tr);transform:scale(.7)}
+.cat-card:hover .cat-arrow{opacity:1;transform:scale(1)}
+
+/* ── CATEGORY DETAIL PAGE ───────────────────────── */
+#page-category{padding-bottom:60px}
+
+/* back bar */
+.back-bar{
+  display:flex;align-items:center;gap:12px;
+  max-width:1200px;margin:0 auto;padding:28px 24px 0;
+}
+.back-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 18px;border-radius:var(--rp);
+  background:var(--surface);border:1.5px solid var(--border);
+  font-size:.85rem;font-weight:600;color:var(--ink2);
+  transition:var(--tr);cursor:pointer;box-shadow:var(--shadow-sm);
+}
+.back-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.back-crumb{font-size:.82rem;color:var(--ink3)}
+.back-crumb span{color:var(--accent);font-weight:600}
+
+/* category hero banner */
+.cat-hero{
+  max-width:1200px;margin:20px auto 0;padding:0 24px;
+}
+.cat-hero-card{
+  border-radius:var(--r);padding:40px 40px 36px;
+  background:linear-gradient(135deg,var(--cat-hero-a,#7c5cbf),var(--cat-hero-b,#a67ff0));
+  color:white;position:relative;overflow:hidden;
+  animation:fadeUp .4s both;
+}
+.cat-hero-card::before{content:'';position:absolute;top:-60px;right:-60px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.08)}
+.cat-hero-card::after{content:'';position:absolute;bottom:-80px;left:40%;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.05)}
+.cat-hero-emoji{font-size:3.5rem;margin-bottom:12px;display:block;animation:fadeUp .4s .1s both}
+.cat-hero-name{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-bottom:8px;animation:fadeUp .4s .15s both}
+.cat-hero-desc{font-size:.95rem;opacity:.88;line-height:1.6;max-width:560px;animation:fadeUp .4s .2s both}
+.cat-hero-stats{display:flex;gap:28px;margin-top:24px;animation:fadeUp .4s .25s both}
+.ch-stat-num{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700}
+.ch-stat-label{font-size:.75rem;opacity:.78;margin-top:2px}
+
+/* topic filter bar inside cat page */
+.cat-filter-bar{
+  max-width:1200px;margin:28px auto 0;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.filter-pills{display:flex;gap:8px;flex-wrap:wrap}
+.filter-pill{padding:7px 16px;border-radius:var(--rp);border:1.5px solid var(--border);background:var(--surface);font-size:.82rem;font-weight:500;color:var(--ink2);cursor:pointer;transition:var(--tr)}
+.filter-pill:hover{border-color:var(--accent);color:var(--accent)}
+.filter-pill.active{background:var(--accent);border-color:var(--accent);color:white}
+.cat-add-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--rp);background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:.85rem;font-weight:600;cursor:pointer;transition:var(--tr);box-shadow:0 4px 14px rgba(124,92,191,.28);border:none}
+.cat-add-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(124,92,191,.38)}
+
+/* topics grid */
+.cat-topics-area{max-width:1200px;margin:24px auto 0;padding:0 24px}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+
+/* ── TOPIC CARD ─────────────────────────────────── */
+.topic-card{
+  background:var(--surface);border-radius:var(--r);padding:22px;
+  border:1.5px solid var(--border);box-shadow:var(--shadow-sm);
+  transition:var(--tr);position:relative;overflow:hidden;
+  animation:fadeUp .4s both;
+}
+.topic-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.tc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}
+.tc-icon{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:1.35rem;flex-shrink:0}
+.tc-actions{display:flex;gap:6px;opacity:0;transition:var(--tr)}
+.topic-card:hover .tc-actions{opacity:1}
+.tc-btn{width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:grid;place-items:center;font-size:.75rem;color:var(--ink2);transition:var(--tr);cursor:pointer}
+.tc-btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
+.tc-btn.danger:hover{background:#ff5757;border-color:#ff5757}
+.tc-name{font-weight:600;font-size:1rem;margin-bottom:6px}
+.tc-desc{font-size:.82rem;color:var(--ink2);line-height:1.65;margin-bottom:14px}
+.tc-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.topic-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--rp);font-size:.72rem;font-weight:600}
+.topic-status{padding:5px 12px;border-radius:var(--rp);font-size:.72rem;font-weight:600;cursor:pointer;transition:var(--tr);border:1.5px solid transparent}
+.st-planned{background:#fff8e6;color:#d97706;border-color:#fcd34d}
+.st-learning{background:#ecfdf5;color:#059669;border-color:#6ee7b7}
+.st-done{background:#f0f9ff;color:#0284c7;border-color:#7dd3fc}
+[data-theme="dark"] .st-planned{background:#2a1f00;color:#fcd34d}
+[data-theme="dark"] .st-learning{background:#002a1a;color:#6ee7b7}
+[data-theme="dark"] .st-done{background:#001a2a;color:#7dd3fc}
+.tc-add-btn{width:100%;margin-top:12px;padding:9px;border-radius:var(--rp);font-size:.82rem;font-weight:600;cursor:pointer;transition:var(--tr);border:1.5px solid var(--border);color:var(--ink2);background:var(--surface2)}
+.tc-add-btn.added{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border-color:transparent;box-shadow:0 4px 14px rgba(124,92,191,.25)}
+.tc-add-btn:hover:not(.added){border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+
+/* ── TAG COLORS ─────────────────────────────────── */
+.tag-prog  {background:#ede9fe;color:#7c3aed}
+.tag-design{background:#fce7f3;color:#be185d}
+.tag-biz   {background:#fef3c7;color:#d97706}
+.tag-sci   {background:#dbeafe;color:#1d4ed8}
+.tag-lang  {background:#dcfce7;color:#16a34a}
+.tag-fit   {background:#fee2e2;color:#dc2626}
+.tag-music {background:#fef9c3;color:#ca8a04}
+.tag-write {background:#e0f2fe;color:#0369a1}
+.tag-hist  {background:#f3e8ff;color:#9333ea}
+.tag-dev   {background:#ffedd5;color:#ea580c}
+[data-theme="dark"] .tag-prog  {background:#2e1065;color:#c4b5fd}
+[data-theme="dark"] .tag-design{background:#500724;color:#fbcfe8}
+[data-theme="dark"] .tag-biz   {background:#451a03;color:#fde68a}
+[data-theme="dark"] .tag-sci   {background:#172554;color:#93c5fd}
+[data-theme="dark"] .tag-lang  {background:#14532d;color:#86efac}
+[data-theme="dark"] .tag-fit   {background:#450a0a;color:#fca5a5}
+[data-theme="dark"] .tag-music {background:#422006;color:#fde047}
+[data-theme="dark"] .tag-write {background:#082f49;color:#7dd3fc}
+[data-theme="dark"] .tag-hist  {background:#3b0764;color:#d8b4fe}
+[data-theme="dark"] .tag-dev   {background:#431407;color:#fdba74}
+
+/* ── MY LEARNING PAGE ───────────────────────────── */
+.progress-section{background:var(--surface);border-radius:var(--r);padding:28px;border:1.5px solid var(--border);box-shadow:var(--shadow-sm);margin-bottom:32px}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.progress-percent{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--accent)}
+.progress-bar-wrap{background:var(--bg2);border-radius:var(--rp);height:10px;margin-bottom:20px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:var(--rp);background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s cubic-bezier(.4,0,.2,1)}
+.progress-stats{display:flex;gap:24px}
+.ps-num{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700}
+.ps-lbl{font-size:.75rem;color:var(--ink3)}
+
+/* ── STUDY GROUPS ───────────────────────────────── */
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.group-card{background:var(--surface);border-radius:var(--r);border:1.5px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;transition:var(--tr);cursor:pointer;animation:fadeUp .4s both}
+.group-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.group-banner{height:80px;display:flex;align-items:center;padding:0 20px;gap:12px}
+.group-banner-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:white}
+.group-body{padding:18px 20px}
+.group-desc{font-size:.84rem;color:var(--ink2);line-height:1.6;margin-bottom:14px}
+.group-meta{display:flex;align-items:center;justify-content:space-between}
+.group-members{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--ink3)}
+.mavs{display:flex}
+.mav{width:26px;height:26px;border-radius:50%;border:2px solid var(--surface);display:grid;place-items:center;font-size:.6rem;color:white;font-weight:700;margin-left:-8px}
+.mav:first-child{margin-left:0}
+
+/* ── CHAT ───────────────────────────────────────── */
+.chat-panel{position:fixed;bottom:0;right:0;z-index:150;width:360px;height:480px;background:var(--surface);border-radius:var(--r) var(--r) 0 0;border:1.5px solid var(--border);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateY(100%);transition:var(--tr)}
+.chat-panel.open{transform:translateY(0)}
+.chat-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:var(--r) var(--r) 0 0;color:white}
+.chat-title{font-weight:600;font-size:.95rem}
+.chat-subtitle{font-size:.74rem;opacity:.8}
+.chat-close{font-size:1.2rem;cursor:pointer;opacity:.8;transition:var(--tr)}
+.chat-close:hover{opacity:1;transform:scale(1.1)}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{display:flex;gap:8px;max-width:85%}
+.chat-msg.mine{align-self:flex-end;flex-direction:row-reverse}
+.msg-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:.65rem;color:white;font-weight:700}
+.msg-bubble{padding:8px 12px;border-radius:14px;font-size:.83rem;line-height:1.5}
+.chat-msg:not(.mine) .msg-bubble{background:var(--surface2);border:1px solid var(--border);color:var(--ink);border-radius:4px 14px 14px 14px}
+.chat-msg.mine .msg-bubble{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border-radius:14px 4px 14px 14px}
+.msg-time{font-size:.68rem;color:var(--ink3);margin-top:4px}
+.chat-msg.mine .msg-time{text-align:right}
+.chat-input-wrap{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.chat-input{flex:1;padding:9px 14px;border-radius:var(--rp);border:1.5px solid var(--border);background:var(--surface2);font-size:.85rem;color:var(--ink);outline:none;transition:var(--tr)}
+.chat-input:focus{border-color:var(--accent)}
+.chat-send{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;display:grid;place-items:center;font-size:.9rem;cursor:pointer;transition:var(--tr)}
+.chat-send:hover{transform:scale(1.1)}
+
+/* ── MODALS ─────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(10,8,30,.6);backdrop-filter:blur(6px);display:none;place-items:center;padding:20px}
+.modal-overlay.open{display:grid}
+.modal{background:var(--surface);border-radius:var(--r);padding:32px;width:100%;max-width:480px;box-shadow:var(--shadow-lg);animation:mIn .3s cubic-bezier(.4,0,.2,1) both;max-height:90vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:scale(.92) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700}
+.modal-close{width:36px;height:36px;border-radius:50%;background:var(--bg2);color:var(--ink2);display:grid;place-items:center;font-size:1rem;cursor:pointer;transition:var(--tr)}
+.modal-close:hover{background:#ff5757;color:white}
+
+/* ── FORMS ──────────────────────────────────────── */
+.fg{margin-bottom:18px}
+.fl{display:block;font-size:.82rem;font-weight:600;color:var(--ink2);margin-bottom:8px;letter-spacing:.03em}
+.fi,.fs,.ft{width:100%;padding:12px 16px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface2);font-size:.93rem;color:var(--ink);outline:none;transition:var(--tr)}
+.fi:focus,.fs:focus,.ft:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,191,.1)}
+.ft{min-height:86px;resize:vertical}
+
+/* ── BUTTONS ────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:var(--rp);font-size:.9rem;font-weight:600;transition:var(--tr);cursor:pointer;border:none}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 4px 16px rgba(124,92,191,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,92,191,.4)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--ink2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:8px 16px;font-size:.82rem}
+
+/* ── EMOJI / COLOR PICKERS ──────────────────────── */
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.emoji-opt{width:38px;height:38px;border-radius:10px;background:var(--surface2);border:2px solid var(--border);display:grid;place-items:center;font-size:1.2rem;cursor:pointer;transition:var(--tr)}
+.emoji-opt:hover{border-color:var(--accent);transform:scale(1.1)}
+.emoji-opt.selected{border-color:var(--accent);background:var(--accent-bg)}
+.color-row{display:flex;gap:8px;flex-wrap:wrap}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:var(--tr);border:3px solid transparent}
+.color-opt:hover{transform:scale(1.15)}
+.color-opt.selected{border-color:var(--ink)}
+
+/* ── FAB ────────────────────────────────────────── */
+.fab{position:fixed;bottom:32px;right:32px;z-index:50;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:1.5rem;box-shadow:var(--shadow-lg);display:grid;place-items:center;cursor:pointer;transition:var(--tr)}
+.fab:hover{transform:scale(1.1) rotate(90deg)}
+
+/* ── TOAST ──────────────────────────────────────── */
+.toast-container{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:var(--rp);font-size:.85rem;font-weight:500;animation:tIn .3s ease both;white-space:nowrap}
+@keyframes tIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.toast.success{background:#059669;color:white}
+.toast.error{background:#dc2626;color:white}
+
+/* ── JOIN-VIA-LINK OVERLAY ───────────────────────── */
+.join-overlay{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(10,8,30,.65);backdrop-filter:blur(8px);
+  display:none;place-items:center;padding:20px;
+}
+.join-overlay.open{display:grid}
+.join-card{
+  background:var(--surface);border-radius:var(--r);
+  width:100%;max-width:440px;overflow:hidden;
+  box-shadow:var(--shadow-lg);
+  animation:mIn .35s cubic-bezier(.4,0,.2,1) both;
+}
+.join-banner{
+  padding:32px 28px 24px;
+  text-align:center;color:white;position:relative;overflow:hidden;
+}
+.join-banner::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.1)}
+.join-banner::after{content:'';position:absolute;bottom:-60px;left:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07)}
+.join-banner-icon{font-size:3rem;margin-bottom:10px;display:block;position:relative;z-index:1}
+.join-banner-name{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;position:relative;z-index:1}
+.join-banner-sub{font-size:.82rem;opacity:.85;margin-top:5px;position:relative;z-index:1}
+.join-body{padding:24px 28px 28px}
+.join-desc{font-size:.9rem;color:var(--ink2);line-height:1.65;margin-bottom:18px}
+.join-meta-row{display:flex;gap:12px;margin-bottom:20px}
+.join-meta-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--rp);background:var(--surface2);border:1px solid var(--border);font-size:.8rem;font-weight:500;color:var(--ink2)}
+.join-actions{display:flex;gap:10px}
+.join-already{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rs);padding:12px 16px;text-align:center;font-size:.85rem;color:var(--ink2);margin-bottom:4px}
+.join-already span{color:var(--mint);font-weight:600}
+
+/* ── INVITE STYLES ──────────────────────────────── */
+.invite-link-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--rs);padding:10px 14px;margin-bottom:6px;
+}
+.invite-link-text{flex:1;font-size:.8rem;color:var(--ink2);word-break:break-all;font-family:monospace}
+.copy-btn{
+  flex-shrink:0;padding:6px 14px;border-radius:var(--rp);
+  background:var(--accent);color:white;font-size:.78rem;font-weight:600;
+  cursor:pointer;transition:var(--tr);border:none;white-space:nowrap;
+}
+.copy-btn:hover{background:var(--accent2)}
+.copy-btn.copied{background:#059669}
+.share-row{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.share-btn{
+  flex:1;min-width:100px;padding:9px 12px;border-radius:var(--rs);
+  border:1.5px solid var(--border);background:var(--surface2);
+  font-size:.8rem;font-weight:600;color:var(--ink2);
+  cursor:pointer;transition:var(--tr);display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.share-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.share-btn.whatsapp:hover{border-color:#25d366;color:#25d366;background:#f0fdf4}
+.share-btn.email-s:hover{border-color:#4fb3f6;color:#0369a1;background:#f0f9ff}
+.share-btn.twitter:hover{border-color:#1da1f2;color:#1da1f2;background:#eff9ff}
+.divider-text{text-align:center;font-size:.76rem;color:var(--ink3);margin:14px 0;position:relative}
+.divider-text::before,.divider-text::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border)}
+.divider-text::before{left:0}
+.divider-text::after{right:0}
+.invite-input-row{display:flex;gap:8px}
+.invite-input-row .fi{flex:1}
+.pending-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;max-height:180px;overflow-y:auto}
+.pending-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-radius:var(--rs);
+  background:var(--surface2);border:1px solid var(--border);
+}
+.pending-av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;color:white;font-weight:700;flex-shrink:0}
+.pending-info{flex:1}
+.pending-name{font-size:.88rem;font-weight:600}
+.pending-status{font-size:.72rem;color:var(--ink3);margin-top:1px}
+.pending-badge{padding:4px 10px;border-radius:var(--rp);font-size:.7rem;font-weight:600}
+.badge-pending{background:#fff8e6;color:#d97706;border:1px solid #fcd34d}
+.badge-accepted{background:#ecfdf5;color:#059669;border:1px solid #6ee7b7}
+[data-theme="dark"] .badge-pending{background:#2a1f00;color:#fcd34d}
+[data-theme="dark"] .badge-accepted{background:#002a1a;color:#6ee7b7}
+/* invite button on group card */
+.invite-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:var(--rp);
+  background:var(--accent-bg);color:var(--accent);
+  border:1.5px solid var(--accent);font-size:.75rem;font-weight:600;
+  cursor:pointer;transition:var(--tr);
+}
+.invite-btn:hover{background:var(--accent);color:white}
+
+/* ── EMPTY STATE ────────────────────────────────── */
+.empty-state{text-align:center;padding:60px 24px;color:var(--ink3)}
+.empty-icon{font-size:3.5rem;margin-bottom:16px}
+.empty-state h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--ink2);margin-bottom:8px}
+.empty-state p{font-size:.88rem;line-height:1.7}
+.no-res{text-align:center;padding:40px;color:var(--ink3);font-size:.9rem;grid-column:1/-1}
+
+/* ── Q&A PAGE ────────────────────────────────────── */
+.qa-hero{
+  background:linear-gradient(135deg,#2d1b69,#7c5cbf,#a67ff0);
+  padding:48px 24px 40px;text-align:center;color:white;
+  position:relative;overflow:hidden;
+}
+.qa-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.06)}
+.qa-hero::after{content:'';position:absolute;bottom:-100px;left:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.04)}
+.qa-hero-inner{position:relative;z-index:1;max-width:640px;margin:0 auto}
+.qa-hero h2{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;margin-bottom:10px}
+.qa-hero p{font-size:.95rem;opacity:.88;line-height:1.65;margin-bottom:28px}
+.qa-stats-row{display:flex;gap:32px;justify-content:center;flex-wrap:wrap}
+.qa-stat{text-align:center}
+.qa-stat-num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700}
+.qa-stat-lbl{font-size:.74rem;opacity:.78;margin-top:2px}
+
+.qa-toolbar{
+  max-width:1100px;margin:28px auto 0;padding:0 24px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.qa-search-wrap{position:relative;flex:1;min-width:200px}
+.qa-search{
+  width:100%;padding:11px 44px 11px 42px;border-radius:var(--rp);
+  border:1.5px solid var(--border);background:var(--surface);
+  font-size:.9rem;color:var(--ink);outline:none;transition:var(--tr);
+}
+.qa-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,191,.1)}
+.qa-search::placeholder{color:var(--ink3)}
+.qa-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.95rem;color:var(--ink3);pointer-events:none}
+.qa-sort{
+  padding:10px 16px;border-radius:var(--rp);border:1.5px solid var(--border);
+  background:var(--surface);font-size:.85rem;color:var(--ink2);
+  outline:none;cursor:pointer;transition:var(--tr);
+}
+.qa-sort:focus{border-color:var(--accent)}
+.ask-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:var(--rp);
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white;font-size:.88rem;font-weight:700;
+  cursor:pointer;border:none;transition:var(--tr);
+  box-shadow:0 4px 16px rgba(124,92,191,.3);white-space:nowrap;
+}
+.ask-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,92,191,.4)}
+
+.qa-filters{
+  max-width:1100px;margin:16px auto 0;padding:0 24px;
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+
+/* question list */
+.qa-list{max-width:1100px;margin:20px auto 60px;padding:0 24px;display:flex;flex-direction:column;gap:14px}
+.q-card{
+  background:var(--surface);border-radius:var(--r);
+  border:1.5px solid var(--border);box-shadow:var(--shadow-sm);
+  transition:var(--tr);animation:fadeUp .4s both;overflow:hidden;
+}
+.q-card:hover{box-shadow:var(--shadow-md);border-color:var(--accent)}
+.q-card-main{display:flex;gap:0;cursor:pointer}
+/* vote column */
+.q-vote{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:20px 16px;gap:4px;border-right:1px solid var(--border);
+  min-width:64px;background:var(--surface2);
+}
+.vote-up,.vote-dn{
+  width:30px;height:30px;border-radius:8px;
+  display:grid;place-items:center;font-size:.9rem;
+  background:none;border:1.5px solid var(--border);
+  color:var(--ink3);cursor:pointer;transition:var(--tr);
+}
+.vote-up:hover{border-color:#059669;color:#059669;background:#ecfdf5}
+.vote-dn:hover{border-color:#dc2626;color:#dc2626;background:#fee2e2}
+.vote-up.voted{border-color:#059669;color:#059669;background:#ecfdf5}
+.vote-dn.voted{border-color:#dc2626;color:#dc2626;background:#fee2e2}
+.vote-count{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--ink);line-height:1}
+/* question body */
+.q-body{flex:1;padding:18px 20px}
+.q-title{font-weight:700;font-size:1.02rem;color:var(--ink);margin-bottom:8px;line-height:1.4}
+.q-excerpt{font-size:.84rem;color:var(--ink2);line-height:1.6;margin-bottom:12px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.q-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.q-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--rp);font-size:.7rem;font-weight:600}
+.q-time{font-size:.74rem;color:var(--ink3)}
+.q-author{display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--ink3)}
+.q-author-av{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:.55rem;color:white;font-weight:700}
+/* answer count badge */
+.q-ans-badge{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:18px 20px;border-left:1px solid var(--border);min-width:72px;
+  gap:3px;
+}
+.q-ans-num{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+.q-ans-num.has-ans{color:#059669}
+.q-ans-lbl{font-size:.68rem;color:var(--ink3);text-align:center}
+.q-ans-lbl.has-ans{color:#059669}
+.q-solved-tick{font-size:1.1rem}
+
+/* ── QUESTION DETAIL VIEW ──────────────────────── */
+.qd-wrap{max-width:860px;margin:0 auto;padding:0 24px 80px}
+.qd-back{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 18px;border-radius:var(--rp);
+  background:var(--surface);border:1.5px solid var(--border);
+  font-size:.85rem;font-weight:600;color:var(--ink2);
+  transition:var(--tr);cursor:pointer;box-shadow:var(--shadow-sm);
+  margin:28px 0 20px;
+}
+.qd-back:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.qd-question{background:var(--surface);border-radius:var(--r);border:1.5px solid var(--border);padding:28px;margin-bottom:24px;box-shadow:var(--shadow-sm)}
+.qd-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;line-height:1.3;margin-bottom:14px}
+.qd-body{font-size:.93rem;color:var(--ink2);line-height:1.75;margin-bottom:18px;white-space:pre-wrap}
+.qd-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border)}
+.qd-vote-row{display:flex;align-items:center;gap:8px}
+
+/* answers section */
+.ans-section-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;margin-bottom:16px}
+.ans-section-title span{color:var(--accent)}
+.ans-card{
+  background:var(--surface);border-radius:var(--r);
+  border:1.5px solid var(--border);padding:22px;margin-bottom:14px;
+  box-shadow:var(--shadow-sm);transition:var(--tr);position:relative;
+}
+.ans-card.best{border-color:#059669;background:#f0fdf4}
+[data-theme="dark"] .ans-card.best{background:#002a1a;border-color:#059669}
+.best-badge{
+  position:absolute;top:14px;right:14px;
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:var(--rp);
+  background:#059669;color:white;font-size:.7rem;font-weight:700;
+}
+.ans-top{display:flex;gap:14px;align-items:flex-start}
+.ans-vote{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:36px}
+.ans-vote-count{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink)}
+.ans-body-col{flex:1}
+.ans-text{font-size:.92rem;color:var(--ink2);line-height:1.75;margin-bottom:12px;white-space:pre-wrap}
+.ans-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.ans-meta{display:flex;align-items:center;gap:8px;font-size:.74rem;color:var(--ink3)}
+.ans-author-av{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.6rem;color:white;font-weight:700}
+.mark-best-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:var(--rp);
+  border:1.5px solid var(--border);background:var(--surface2);
+  font-size:.74rem;font-weight:600;color:var(--ink2);cursor:pointer;transition:var(--tr);
+}
+.mark-best-btn:hover{border-color:#059669;color:#059669;background:#ecfdf5}
+
+/* write answer box */
+.write-ans-box{
+  background:var(--surface);border-radius:var(--r);
+  border:1.5px solid var(--border);padding:24px;margin-top:28px;
+  box-shadow:var(--shadow-sm);
+}
+.write-ans-title{font-weight:700;font-size:1rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.write-ans-ta{
+  width:100%;min-height:120px;padding:14px 16px;
+  border-radius:var(--rs);border:1.5px solid var(--border);
+  background:var(--surface2);font-size:.92rem;color:var(--ink);
+  outline:none;resize:vertical;transition:var(--tr);font-family:inherit;line-height:1.6;
+}
+.write-ans-ta:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,191,.1)}
+.write-ans-ta::placeholder{color:var(--ink3)}
+.char-count{font-size:.74rem;color:var(--ink3);text-align:right;margin-top:6px}
+
+/* ask modal */
+.ask-char{font-size:.74rem;color:var(--ink3);text-align:right;margin-top:4px}
+
+/* ── MOBILE Q&A ─────────────────────────────────── */
+@media(max-width:640px){
+  .q-card-main{flex-direction:column}
+  .q-vote{flex-direction:row;border-right:none;border-bottom:1px solid var(--border);padding:12px 16px;min-width:unset}
+  .q-ans-badge{border-left:none;border-top:1px solid var(--border);flex-direction:row;padding:12px 16px;min-width:unset;justify-content:flex-start;gap:8px}
+  .qa-toolbar{flex-direction:column;align-items:stretch}
+  .qa-search-wrap{width:100%}
+}
+
+/* ══ SUPPORT PAGE ══════════════════════════════════ */
+
+/* support nav pill */
+.support-nav-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:var(--rp);
+  background:linear-gradient(135deg,#ff7d6b,#f5a623);
+  color:white;font-size:.82rem;font-weight:700;
+  cursor:pointer;border:none;transition:var(--tr);
+  box-shadow:0 3px 12px rgba(255,125,107,.3);
+}
+.support-nav-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,125,107,.4)}
+
+/* floating support widget */
+.support-float{
+  position:fixed;bottom:110px;right:32px;z-index:49;
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+}
+.support-float-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:11px 18px;border-radius:var(--rp);
+  background:linear-gradient(135deg,#ff7d6b,#f5a623);
+  color:white;font-size:.84rem;font-weight:700;
+  cursor:pointer;border:none;transition:var(--tr);
+  box-shadow:0 6px 20px rgba(255,125,107,.35);
+}
+.support-float-btn:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 28px rgba(255,125,107,.45)}
+.support-float-pulse{
+  position:absolute;top:-4px;right:-4px;
+  width:12px;height:12px;border-radius:50%;background:#ff4444;
+  animation:pulse-ring 1.8s ease-in-out infinite;
+}
+@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(255,68,68,.5)}70%{box-shadow:0 0 0 8px rgba(255,68,68,0)}100%{box-shadow:0 0 0 0 rgba(255,68,68,0)}}
+
+/* support page hero */
+.sp-hero{
+  background:linear-gradient(135deg,#1a0a2e,#ff7d6b 150%);
+  padding:52px 24px 44px;position:relative;overflow:hidden;
+}
+.sp-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(255,125,107,.25),transparent)}
+.sp-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.15),transparent)}
+.sp-hero-inner{max-width:700px;margin:0 auto;text-align:center;position:relative;z-index:1}
+.sp-eyebrow{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);color:white;padding:6px 16px;border-radius:var(--rp);font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+.sp-hero h2{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,4.5vw,2.8rem);font-weight:700;color:white;line-height:1.2;margin-bottom:12px}
+.sp-hero h2 em{font-style:normal;color:#ffd39b}
+.sp-hero p{color:rgba(255,255,255,.82);font-size:.97rem;line-height:1.7;margin-bottom:32px}
+.sp-stats{display:flex;gap:28px;justify-content:center;flex-wrap:wrap}
+.sp-stat{text-align:center;color:white}
+.sp-stat-num{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700}
+.sp-stat-lbl{font-size:.74rem;opacity:.75;margin-top:2px}
+
+/* quick contact cards */
+.sp-contacts{
+  max-width:1000px;margin:-32px auto 0;padding:0 24px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;
+  position:relative;z-index:2;
+}
+.sp-contact-card{
+  background:var(--surface);border-radius:var(--r);padding:22px 20px;
+  border:1.5px solid var(--border);box-shadow:var(--shadow-md);
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;
+  cursor:pointer;transition:var(--tr);
+}
+.sp-contact-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.sp-contact-icon{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:1.5rem}
+.sp-contact-name{font-weight:700;font-size:.95rem;color:var(--ink)}
+.sp-contact-sub{font-size:.76rem;color:var(--ink3);line-height:1.5}
+.sp-contact-badge{padding:4px 12px;border-radius:var(--rp);font-size:.7rem;font-weight:700}
+
+/* categories */
+.sp-section{max-width:1000px;margin:40px auto 0;padding:0 24px}
+.sp-section-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;margin-bottom:20px;color:var(--ink)}
+.sp-section-title span{color:var(--coral)}
+.sp-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:0}
+.sp-cat-card{
+  padding:16px 14px;border-radius:var(--rs);border:2px solid var(--border);
+  background:var(--surface2);cursor:pointer;transition:var(--tr);text-align:center;
+}
+.sp-cat-card:hover{border-color:var(--cc,var(--coral));background:var(--surface)}
+.sp-cat-card.selected{border-color:var(--cc,var(--coral));background:var(--surface);box-shadow:0 0 0 3px rgba(255,125,107,.12)}
+.sp-cat-icon{font-size:1.6rem;margin-bottom:6px}
+.sp-cat-name{font-size:.82rem;font-weight:600;color:var(--ink)}
+
+/* support form */
+.sp-form-card{
+  background:var(--surface);border-radius:var(--r);
+  border:1.5px solid var(--border);box-shadow:var(--shadow-sm);
+  padding:32px;
+}
+.sp-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.sp-form-grid{grid-template-columns:1fr}}
+.sp-form-full{grid-column:1/-1}
+.sp-input,.sp-select,.sp-textarea{
+  width:100%;padding:12px 16px;border-radius:var(--rs);
+  border:1.5px solid var(--border);background:var(--surface2);
+  font-size:.92rem;color:var(--ink);outline:none;transition:var(--tr);
+}
+.sp-input:focus,.sp-select:focus,.sp-textarea:focus{border-color:var(--coral);box-shadow:0 0 0 3px rgba(255,125,107,.1)}
+.sp-input.err,.sp-select.err,.sp-textarea.err{border-color:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+.sp-textarea{min-height:120px;resize:vertical;font-family:inherit;line-height:1.6}
+.sp-label{display:block;font-size:.8rem;font-weight:700;color:var(--ink2);margin-bottom:7px;letter-spacing:.03em}
+.sp-err-msg{font-size:.74rem;color:#dc2626;margin-top:4px;display:none}
+.sp-err-msg.show{display:block}
+.sp-priority-row{display:flex;gap:8px;flex-wrap:wrap}
+.sp-priority-opt{
+  flex:1;min-width:80px;padding:9px 12px;border-radius:var(--rs);
+  border:2px solid var(--border);background:var(--surface2);
+  font-size:.78rem;font-weight:600;color:var(--ink2);
+  cursor:pointer;transition:var(--tr);text-align:center;
+}
+.sp-priority-opt:hover{border-color:var(--acc,var(--accent))}
+.sp-priority-opt.sel{border-color:var(--acc,var(--accent));background:var(--surface);color:var(--ink)}
+.submit-sp-btn{
+  width:100%;padding:14px;border-radius:var(--rp);
+  background:linear-gradient(135deg,#ff7d6b,#f5a623);
+  color:white;font-size:1rem;font-weight:700;
+  cursor:pointer;border:none;transition:var(--tr);
+  box-shadow:0 4px 18px rgba(255,125,107,.3);margin-top:6px;
+}
+.submit-sp-btn:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(255,125,107,.4)}
+.submit-sp-btn:disabled{opacity:.6;transform:none;cursor:not-allowed}
+
+/* success state */
+.sp-success{
+  background:var(--surface);border-radius:var(--r);
+  border:1.5px solid #6ee7b7;padding:48px 32px;text-align:center;
+  box-shadow:var(--shadow-sm);display:none;animation:fadeUp .4s both;
+}
+.sp-success.show{display:block}
+.sp-success-icon{font-size:4rem;margin-bottom:16px}
+.sp-success h3{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#059669;margin-bottom:10px}
+.sp-success p{font-size:.92rem;color:var(--ink2);line-height:1.7;margin-bottom:24px}
+.sp-ticket-id{display:inline-block;background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:var(--rs);padding:10px 20px;font-family:monospace;font-size:.9rem;color:#059669;font-weight:700;letter-spacing:.04em;margin-bottom:24px}
+
+/* my tickets */
+.ticket-list{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.ticket-item{
+  background:var(--surface);border-radius:var(--rs);
+  border:1.5px solid var(--border);padding:16px 18px;
+  display:flex;align-items:center;gap:14px;
+  box-shadow:var(--shadow-sm);transition:var(--tr);
+}
+.ticket-item:hover{box-shadow:var(--shadow-md)}
+.ticket-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:1.1rem;flex-shrink:0}
+.ticket-info{flex:1}
+.ticket-title{font-weight:600;font-size:.9rem;color:var(--ink);margin-bottom:3px}
+.ticket-meta{font-size:.75rem;color:var(--ink3)}
+.ticket-status{padding:5px 12px;border-radius:var(--rp);font-size:.72rem;font-weight:700;flex-shrink:0}
+.ts-open{background:#fff8e6;color:#d97706;border:1px solid #fcd34d}
+.ts-progress{background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc}
+.ts-resolved{background:#ecfdf5;color:#059669;border:1px solid #6ee7b7}
+[data-theme="dark"] .ts-open{background:#2a1f00;color:#fcd34d}
+[data-theme="dark"] .ts-progress{background:#082f49;color:#7dd3fc}
+[data-theme="dark"] .ts-resolved{background:#002a1a;color:#6ee7b7}
+
+/* help banner on other pages */
+.help-banner{
+  margin:0 24px 24px;border-radius:var(--r);
+  background:linear-gradient(135deg,rgba(255,125,107,.12),rgba(245,166,35,.08));
+  border:1.5px solid rgba(255,125,107,.25);
+  padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.help-banner-icon{font-size:1.8rem;flex-shrink:0}
+.help-banner-text{flex:1}
+.help-banner-text strong{font-size:.92rem;color:var(--ink);display:block;margin-bottom:2px}
+.help-banner-text span{font-size:.8rem;color:var(--ink2)}
+.help-banner-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:var(--rp);
+  background:linear-gradient(135deg,#ff7d6b,#f5a623);
+  color:white;font-size:.8rem;font-weight:700;
+  cursor:pointer;border:none;transition:var(--tr);
+  box-shadow:0 3px 10px rgba(255,125,107,.3);white-space:nowrap;
+}
+.help-banner-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(255,125,107,.4)}
+
+/* ── MOBILE ─────────────────────────────────────── */
+@media(max-width:640px){
+  .navbar{padding:0 16px}
+  .nav-tabs{display:none}
+  .mobile-tabs{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);border-top:1px solid var(--border);padding:8px 0 16px}
+  .mobile-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.64rem;color:var(--ink3);padding:6px;transition:var(--tr);cursor:pointer}
+  .mobile-tab.active{color:var(--accent)}
+  .mobile-tab-icon{font-size:1.3rem}
+  .section,.cat-topics-area{padding-bottom:100px}
+  .chat-panel{width:100%}
+  .fab{bottom:88px}
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+  .cat-hero-card{padding:28px 24px}
+  .cat-hero-name{font-size:1.5rem}
+}
+@media(min-width:641px){.mobile-tabs{display:none}}
+</style>
+</head>
+<body>
+
+<div class="orbs">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+</div>
+
+<div class="app">
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="logo" onclick="showPage('discover')">
+    <div class="logo-icon">📚</div>LearnLab
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('discover')">🔍 Discover</button>
+    <button class="nav-tab" onclick="showPage('mylearning')">📖 My Learning</button>
+    <button class="nav-tab" onclick="showPage('groups')">👥 Study Groups</button>
+    <button class="nav-tab" onclick="showPage('qa')">❓ Q&amp;A</button>
+  </div>
+  <div class="nav-right">
+    <button class="support-nav-btn" onclick="showPage('support')" title="Get Support">🎧 Support</button>
+    <div class="dark-toggle" id="darkToggle" onclick="toggleDark()">
+      <div class="dark-toggle-knob">☀️</div>
+    </div>
+    <button class="notif-btn">🔔</button>
+    <div class="avatar">S</div>
+  </div>
+</nav>
+
+<!-- ══ PAGE: DISCOVER (Homepage) ══ -->
+<div class="page active" id="page-discover">
+  <div class="hero">
+    <div class="hero-eyebrow">✨ Personal Learning Planner</div>
+    <h1>What will you <span>master</span> today?</h1>
+    <p>Choose a category below to explore topics, build your path, and track your journey.</p>
+    <div class="search-wrap">
+      <span class="s-icon">🔍</span>
+      <input class="search-bar" id="searchBar" type="text" placeholder="Search topics, categories, skills…" oninput="handleSearch(this)"/>
+      <div class="s-clear" id="searchClear" onclick="clearSearch()">✕</div>
+    </div>
+    <div class="quote-bar" id="quoteBar"></div>
+  </div>
+
+  <!-- Search results (shown only when searching) -->
+  <div class="section" id="searchResultsSection" style="display:none">
+    <div class="section-header">
+      <div class="section-title">Search <span>Results</span></div>
+    </div>
+    <div class="topic-grid" id="searchResultsGrid"></div>
+    <div class="no-res" id="searchNoRes" style="display:none">🔍 No results found. Try something else or <button onclick="openAddModal()" style="color:var(--accent);font-weight:600;cursor:pointer">add a custom topic</button>.</div>
+  </div>
+
+  <!-- Category grid (hidden while searching) -->
+  <div class="section" id="catSection">
+    <div class="section-header">
+      <div class="section-title">Browse <span>Categories</span></div>
+      <span style="font-size:.82rem;color:var(--ink3)">Click a category to explore ↓</span>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+  <!-- Help Banner -->
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="help-banner">
+      <div class="help-banner-icon">🎧</div>
+      <div class="help-banner-text">
+        <strong>Need help with any course or roadmap?</strong>
+        <span>Connect with our support team directly — we're here to guide your learning journey.</span>
+      </div>
+      <button class="help-banner-btn" onclick="showPage('support')">Get Support →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: CATEGORY DETAIL ══ -->
+<div class="page" id="page-category">
+  <!-- Back nav -->
+  <div class="back-bar">
+    <button class="back-btn" onclick="goBack()">← Back</button>
+    <div class="back-crumb">Home / <span id="breadcrumbCat">Category</span></div>
+  </div>
+
+  <!-- Category hero banner -->
+  <div class="cat-hero">
+    <div class="cat-hero-card" id="catHeroCard">
+      <span class="cat-hero-emoji" id="catHeroEmoji">💻</span>
+      <div class="cat-hero-name" id="catHeroName">Programming</div>
+      <div class="cat-hero-desc" id="catHeroDesc">Master coding skills from scratch to advanced.</div>
+      <div class="cat-hero-stats">
+        <div><div class="ch-stat-num" id="catStatTotal">0</div><div class="ch-stat-label">Total Topics</div></div>
+        <div><div class="ch-stat-num" id="catStatAdded">0</div><div class="ch-stat-label">In My Learning</div></div>
+        <div><div class="ch-stat-num" id="catStatDone">0</div><div class="ch-stat-label">Completed</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter + add button -->
+  <div class="cat-filter-bar">
+    <div class="filter-pills" id="catStatusFilter">
+      <button class="filter-pill active" onclick="setCatFilter('all',this)">All</button>
+      <button class="filter-pill" onclick="setCatFilter('planned',this)">📋 Planned</button>
+      <button class="filter-pill" onclick="setCatFilter('learning',this)">🎓 Learning</button>
+      <button class="filter-pill" onclick="setCatFilter('done',this)">✅ Done</button>
+    </div>
+    <button class="cat-add-btn" onclick="openAddModal()">＋ Add Custom Topic</button>
+  </div>
+
+  <!-- Topics grid -->
+  <div class="cat-topics-area">
+    <div class="topic-grid" id="catTopicGrid"></div>
+    <div class="no-res" id="catNoRes" style="display:none">No topics found for this filter.</div>
+  </div>
+  <!-- Help Banner on Category Page -->
+  <div style="max-width:1200px;margin:8px auto 0">
+    <div class="help-banner">
+      <div class="help-banner-icon">💡</div>
+      <div class="help-banner-text">
+        <strong>Stuck on this topic or roadmap?</strong>
+        <span>Our support team can help with course guidance, resources, and learning plans.</span>
+      </div>
+      <button class="help-banner-btn" onclick="openSupportWithContext()">Get Course Help →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: MY LEARNING ══ -->
+<div class="page" id="page-mylearning">
+  <div class="section" style="padding-top:40px">
+    <div class="section-header">
+      <div class="section-title">My <span>Learning Path</span></div>
+    </div>
+    <div class="progress-section">
+      <div class="progress-header">
+        <div>
+          <div style="font-weight:600;font-size:1.05rem">Overall Progress</div>
+          <div style="font-size:.8rem;color:var(--ink3);margin-top:2px">Keep going — you're doing great! 🚀</div>
+        </div>
+        <div class="progress-percent" id="progressPct">0%</div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+      <div class="progress-stats">
+        <div><div class="ps-num" id="stPlanned">0</div><div class="ps-lbl">Planned</div></div>
+        <div><div class="ps-num" id="stLearning">0</div><div class="ps-lbl">Learning</div></div>
+        <div><div class="ps-num" id="stDone">0</div><div class="ps-lbl">Completed</div></div>
+        <div><div class="ps-num" id="stTotal">0</div><div class="ps-lbl">Total</div></div>
+      </div>
+    </div>
+    <div class="topic-grid" id="myTopicGrid"></div>
+    <div class="empty-state" id="myEmpty" style="display:none">
+      <div class="empty-icon">🌱</div>
+      <h3>Your learning path is empty</h3>
+      <p>Go to Discover, pick a category, and add topics to your learning list!</p>
+      <br/>
+      <button class="btn btn-primary" onclick="showPage('discover')">🔍 Explore Categories</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: STUDY GROUPS ══ -->
+<div class="page" id="page-groups">
+  <div class="section" style="padding-top:40px">
+    <div class="section-header">
+      <div class="section-title">Study <span>Groups</span></div>
+      <button class="btn btn-primary btn-sm" onclick="openCreateGroup()">+ Create Group</button>
+    </div>
+    <div class="filter-pills" style="margin-bottom:28px" id="groupFilter">
+      <button class="filter-pill active" onclick="setGroupFilter('all',this)">All Groups</button>
+      <button class="filter-pill" onclick="setGroupFilter('joined',this)">My Groups</button>
+    </div>
+    <div class="groups-grid" id="groupsGrid"></div>
+  </div>
+</div>
+
+<!-- ══ PAGE: Q&A ══ -->
+<div class="page" id="page-qa">
+  <!-- Hero -->
+  <div class="qa-hero">
+    <div class="qa-hero-inner">
+      <div class="hero-eyebrow" style="background:rgba(255,255,255,.15);color:white;margin-bottom:14px">💬 Community Knowledge Base</div>
+      <h2>Ask. Answer. <span style="color:#c4a8ff">Learn Together.</span></h2>
+      <p>Post your questions, get answers from fellow students, and help others grow.</p>
+      <div class="qa-stats-row">
+        <div class="qa-stat"><div class="qa-stat-num" id="qStatTotal">0</div><div class="qa-stat-lbl">Questions</div></div>
+        <div class="qa-stat"><div class="qa-stat-num" id="qStatAnswered">0</div><div class="qa-stat-lbl">Answered</div></div>
+        <div class="qa-stat"><div class="qa-stat-num" id="qStatAnswers">0</div><div class="qa-stat-lbl">Total Answers</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question list view -->
+  <div id="qa-list-view">
+    <!-- Toolbar -->
+    <div class="qa-toolbar">
+      <div class="qa-search-wrap">
+        <span class="qa-search-icon">🔍</span>
+        <input class="qa-search" id="qaSearch" placeholder="Search questions…" oninput="filterQA()"/>
+      </div>
+      <select class="qa-sort" id="qaSort" onchange="filterQA()">
+        <option value="newest">🕐 Newest First</option>
+        <option value="votes">🔥 Most Voted</option>
+        <option value="unanswered">❓ Unanswered</option>
+        <option value="answered">✅ Answered</option>
+      </select>
+      <button class="ask-btn" onclick="openAskModal()">✏️ Ask a Question</button>
+    </div>
+    <!-- Category filters -->
+    <div class="qa-filters" id="qaFilters"></div>
+    <!-- Question cards -->
+    <div class="qa-list" id="qaList"></div>
+  </div>
+
+  <!-- Question detail view (hidden by default) -->
+  <div id="qa-detail-view" style="display:none">
+    <div class="qd-wrap">
+      <button class="qd-back" onclick="closeQuestionDetail()">← Back to Questions</button>
+
+      <!-- The question -->
+      <div class="qd-question" id="qdQuestion"></div>
+
+      <!-- Answers -->
+      <div id="qdAnswers"></div>
+
+      <!-- Write answer -->
+      <div class="write-ans-box">
+        <div class="write-ans-title">💬 Write Your Answer</div>
+        <textarea class="write-ans-ta" id="answerInput" placeholder="Share your knowledge… Be clear, helpful and specific." maxlength="1000" oninput="document.getElementById('ansCharCount').textContent=this.value.length+'/1000'"></textarea>
+        <div class="char-count" id="ansCharCount">0/1000</div>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px">
+          <button class="btn btn-primary" onclick="submitAnswer()">Post Answer ➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- ══ SUPPORT PAGE (outside .app so it can be full page) ══ -->
+<div class="page" id="page-support" style="display:none">
+
+  <!-- Hero -->
+  <div class="sp-hero">
+    <div class="sp-hero-inner">
+      <div class="sp-eyebrow">🎧 Student Support Center</div>
+      <h2>We're here to <em>help you</em> succeed.</h2>
+      <p>Need help with a course, roadmap, or technical issue? Our support team responds within 24 hours. You're never stuck alone.</p>
+      <div class="sp-stats">
+        <div class="sp-stat"><div class="sp-stat-num">24h</div><div class="sp-stat-lbl">Response Time</div></div>
+        <div class="sp-stat"><div class="sp-stat-num" id="spTicketCount">0</div><div class="sp-stat-lbl">Tickets Resolved</div></div>
+        <div class="sp-stat"><div class="sp-stat-num">98%</div><div class="sp-stat-lbl">Satisfaction</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Contact Cards -->
+  <div class="sp-contacts">
+    <div class="sp-contact-card" onclick="spContact('email')">
+      <div class="sp-contact-icon" style="background:#e0f2fe">📧</div>
+      <div class="sp-contact-name">Email Support</div>
+      <div class="sp-contact-sub">support@learnlab.app<br/>Response within 24h</div>
+      <span class="sp-contact-badge" style="background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc">Send Email</span>
+    </div>
+    <div class="sp-contact-card" onclick="spContact('whatsapp')">
+      <div class="sp-contact-icon" style="background:#dcfce7">💬</div>
+      <div class="sp-contact-name">WhatsApp Chat</div>
+      <div class="sp-contact-sub">Chat with a tutor<br/>Mon–Sat, 9am–6pm</div>
+      <span class="sp-contact-badge" style="background:#dcfce7;color:#16a34a;border:1px solid #86efac">Chat Now</span>
+    </div>
+    <div class="sp-contact-card" onclick="spContact('community')">
+      <div class="sp-contact-icon" style="background:#f3e8ff">👥</div>
+      <div class="sp-contact-name">Community Forum</div>
+      <div class="sp-contact-sub">Ask the community<br/>1000+ active students</div>
+      <span class="sp-contact-badge" style="background:#f3e8ff;color:#9333ea;border:1px solid #d8b4fe">Visit Forum</span>
+    </div>
+    <div class="sp-contact-card" onclick="spContact('live')">
+      <div class="sp-contact-icon" style="background:#fff8e6">⚡</div>
+      <div class="sp-contact-name">Live Chat</div>
+      <div class="sp-contact-sub">Instant help available<br/>
+        <span id="liveStatus" style="color:#059669;font-weight:700">● Online now</span>
+      </div>
+      <span class="sp-contact-badge" style="background:#fff8e6;color:#d97706;border:1px solid #fcd34d">Start Chat</span>
+    </div>
+  </div>
+
+  <!-- Support Categories -->
+  <div class="sp-section" style="margin-top:48px">
+    <div class="sp-section-title">What do you need help with? <span>Choose a category</span></div>
+    <div class="sp-cats" id="spCatGrid"></div>
+  </div>
+
+  <!-- Support Form & Success -->
+  <div class="sp-section" style="margin-top:32px;margin-bottom:60px">
+    <div class="sp-section-title" style="margin-bottom:20px">📝 Submit a <span>Support Ticket</span></div>
+
+    <!-- Form card -->
+    <div class="sp-form-card" id="spFormCard">
+      <div class="sp-form-grid">
+        <!-- Name -->
+        <div>
+          <label class="sp-label">Full Name *</label>
+          <input class="sp-input" id="spName" placeholder="Your full name" oninput="spClearErr('spName')"/>
+          <div class="sp-err-msg" id="spNameErr">Please enter your name.</div>
+        </div>
+        <!-- Email -->
+        <div>
+          <label class="sp-label">Email Address *</label>
+          <input class="sp-input" id="spEmail" type="email" placeholder="your@email.com" oninput="spClearErr('spEmail')"/>
+          <div class="sp-err-msg" id="spEmailErr">Enter a valid email address.</div>
+        </div>
+        <!-- Course / Roadmap -->
+        <div class="sp-form-full">
+          <label class="sp-label">Course / Roadmap / Topic Name</label>
+          <input class="sp-input" id="spCourse" placeholder="e.g., Python Programming, Web Development Roadmap…"/>
+        </div>
+        <!-- Issue Category -->
+        <div>
+          <label class="sp-label">Issue Category *</label>
+          <select class="sp-select" id="spCategory" onchange="spClearErr('spCategory')">
+            <option value="">— Select a category —</option>
+            <option value="course">📚 Course Help</option>
+            <option value="roadmap">🗺️ Roadmap Guidance</option>
+            <option value="technical">🔧 Technical Issue</option>
+            <option value="account">👤 Profile / Account</option>
+            <option value="billing">💳 Billing / Payment</option>
+            <option value="other">💬 Other Query</option>
+          </select>
+          <div class="sp-err-msg" id="spCategoryErr">Please select a category.</div>
+        </div>
+        <!-- Priority -->
+        <div>
+          <label class="sp-label">Priority Level</label>
+          <div class="sp-priority-row" id="spPriorityRow">
+            <div class="sp-priority-opt sel" style="--acc:#059669" onclick="spSetPriority('low',this)">🟢 Low</div>
+            <div class="sp-priority-opt" style="--acc:#d97706" onclick="spSetPriority('medium',this)">🟡 Medium</div>
+            <div class="sp-priority-opt" style="--acc:#dc2626" onclick="spSetPriority('high',this)">🔴 High</div>
+          </div>
+        </div>
+        <!-- Message -->
+        <div class="sp-form-full">
+          <label class="sp-label">Describe Your Issue *</label>
+          <textarea class="sp-textarea" id="spMessage" placeholder="Please describe your issue in detail. The more information you provide, the faster we can help you!" maxlength="1200" oninput="spClearErr('spMessage');document.getElementById('spMsgCount').textContent=this.value.length+'/1200'"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px">
+            <div class="sp-err-msg" id="spMessageErr" style="margin-top:0">Please describe your issue (min 20 characters).</div>
+            <div style="font-size:.73rem;color:var(--ink3);margin-left:auto" id="spMsgCount">0/1200</div>
+          </div>
+        </div>
+        <!-- Attachment note -->
+        <div class="sp-form-full" style="background:var(--surface2);border-radius:var(--rs);padding:12px 16px;border:1px solid var(--border)">
+          <div style="font-size:.8rem;color:var(--ink2);display:flex;align-items:center;gap:8px">
+            <span>📎</span>
+            <span>For screenshots or files, mention it in your message and our team will ask you to share them via email.</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="submit-sp-btn" id="spSubmitBtn" onclick="submitSupportTicket()">
+          🚀 Submit Support Request
+        </button>
+        <div style="text-align:center;margin-top:12px;font-size:.76rem;color:var(--ink3)">
+          🔒 Your information is safe with us. We respond within 24 hours.
+        </div>
+      </div>
+    </div>
+
+    <!-- Success state -->
+    <div class="sp-success" id="spSuccess">
+      <div class="sp-success-icon">🎉</div>
+      <h3>Support Request Submitted!</h3>
+      <p>Thank you! Your ticket has been received. Our support team will reach out within <strong>24 hours</strong>. Check your email for a confirmation.</p>
+      <div class="sp-ticket-id" id="spTicketIdDisplay">TICKET-000000</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-outline" onclick="spSubmitAnother()">Submit Another</button>
+        <button class="btn btn-primary" onclick="showPage('discover')">Back to Learning 📚</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Tickets -->
+  <div class="sp-section" style="margin-top:0;margin-bottom:80px" id="myTicketsSection">
+    <div class="sp-section-title">🎫 My <span>Support Tickets</span></div>
+    <div id="spTicketList">
+      <div class="empty-state" style="padding:36px 0">
+        <div class="empty-icon">🎫</div>
+        <h3 style="font-size:1.1rem">No tickets yet</h3>
+        <p>Submit your first support request above!</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs">
+  <div class="mobile-tab active" onclick="showPage('discover')" id="mt-discover"><div class="mobile-tab-icon">🔍</div>Discover</div>
+  <div class="mobile-tab" onclick="showPage('mylearning')" id="mt-mylearning"><div class="mobile-tab-icon">📖</div>Learning</div>
+  <div class="mobile-tab" onclick="showPage('groups')" id="mt-groups"><div class="mobile-tab-icon">👥</div>Groups</div>
+  <div class="mobile-tab" onclick="showPage('qa')" id="mt-qa"><div class="mobile-tab-icon">❓</div>Q&amp;A</div>
+  <div class="mobile-tab" onclick="showPage('support')" id="mt-support"><div class="mobile-tab-icon">🎧</div>Support</div>
+</div>
+
+<!-- FLOATING SUPPORT WIDGET (hidden on support page) -->
+<div class="support-float" id="supportFloat">
+  <button class="support-float-btn" onclick="showPage('support')" style="position:relative">
+    <span style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#ff4444;animation:pulse-ring 1.8s infinite"></span>
+    🎧 Need Help?
+  </button>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openAddModal()" title="Add Custom Topic">＋</button>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <div><div class="chat-title" id="chatGName">Group Chat</div><div class="chat-subtitle" id="chatGSub">members online</div></div>
+    <div class="chat-close" onclick="closeChat()">✕</div>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-wrap">
+    <input class="chat-input" id="chatInput" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- MODAL: Add Topic -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✨ Add Custom Topic</div>
+      <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="fg"><label class="fl">Topic Name *</label><input class="fi" id="newName" placeholder="e.g., Machine Learning Basics"/></div>
+    <div class="fg"><label class="fl">Description</label><textarea class="ft" id="newDesc" placeholder="What will you learn?"></textarea></div>
+    <div class="fg"><label class="fl">Category *</label><select class="fs" id="newCat"></select></div>
+    <div class="fg"><label class="fl">Icon</label><div class="emoji-row" id="emojiPick"></div></div>
+    <div class="fg"><label class="fl">Status</label><select class="fs" id="newStatus"><option value="planned">📋 Planned</option><option value="learning">🎓 Learning</option></select></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('addModal')">Cancel</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveNewTopic()">Add Topic 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Topic -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Edit Topic</div>
+      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <input type="hidden" id="editId"/>
+    <div class="fg"><label class="fl">Topic Name *</label><input class="fi" id="editName"/></div>
+    <div class="fg"><label class="fl">Description</label><textarea class="ft" id="editDesc"></textarea></div>
+    <div class="fg"><label class="fl">Category</label><select class="fs" id="editCat"></select></div>
+    <div class="fg"><label class="fl">Status</label><select class="fs" id="editStatus"><option value="planned">📋 Planned</option><option value="learning">🎓 Learning</option><option value="done">✅ Done</option></select></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('editModal')">Cancel</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Create Group -->
+<div class="modal-overlay" id="createGroupModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">👥 Create Study Group</div>
+      <button class="modal-close" onclick="closeModal('createGroupModal')">✕</button>
+    </div>
+    <div class="fg"><label class="fl">Group Name *</label><input class="fi" id="gName" placeholder="e.g., Python Wizards"/></div>
+    <div class="fg"><label class="fl">Description</label><textarea class="ft" id="gDesc" placeholder="What is this group about?"></textarea></div>
+    <div class="fg"><label class="fl">Topic Category</label><select class="fs" id="gCat"></select></div>
+    <div class="fg"><label class="fl">Group Icon</label><div class="emoji-row" id="gEmojiPick"></div></div>
+    <div class="fg"><label class="fl">Group Color</label><div class="color-row" id="gColorPick"></div></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('createGroupModal')">Cancel</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveGroup()">Create 🎉</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Ask a Question -->
+<div class="modal-overlay" id="askModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Ask a Question</div>
+      <button class="modal-close" onclick="closeModal('askModal')">✕</button>
+    </div>
+    <div class="fg">
+      <label class="fl">Question Title *</label>
+      <input class="fi" id="qTitle" placeholder="e.g., What is the difference between Python lists and tuples?" maxlength="150" oninput="document.getElementById('qTitleCount').textContent=this.value.length+'/150'"/>
+      <div class="ask-char" id="qTitleCount">0/150</div>
+    </div>
+    <div class="fg">
+      <label class="fl">Details (optional)</label>
+      <textarea class="ft" id="qBody" placeholder="Explain your question in more detail, share what you've tried, or add context…" style="min-height:110px" maxlength="800" oninput="document.getElementById('qBodyCount').textContent=this.value.length+'/800'"></textarea>
+      <div class="ask-char" id="qBodyCount">0/800</div>
+    </div>
+    <div class="fg">
+      <label class="fl">Category *</label>
+      <select class="fs" id="qCat"></select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('askModal')">Cancel</button>
+      <button class="btn btn-primary" style="flex:1" onclick="submitQuestion()">Post Question 🚀</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastCont"></div>
+
+<!-- JOIN-VIA-LINK OVERLAY -->
+<div class="join-overlay" id="joinOverlay">
+  <div class="join-card">
+    <div class="join-banner" id="joinOverlayBanner" style="background:linear-gradient(135deg,var(--accent),var(--accent2))">
+      <span class="join-banner-icon" id="joinOverlayIcon">👥</span>
+      <div class="join-banner-name" id="joinOverlayName">Study Group</div>
+      <div class="join-banner-sub">You've been invited to join this group!</div>
+    </div>
+    <div class="join-body">
+      <div class="join-desc" id="joinOverlayDesc"></div>
+      <div class="join-meta-row">
+        <span class="join-meta-pill" id="joinOverlayCat">📚 Category</span>
+        <span class="join-meta-pill" id="joinOverlayMembers">👥 Members</span>
+      </div>
+      <!-- Already joined state -->
+      <div id="joinAlreadyBox" style="display:none">
+        <div class="join-already">You're already a <span>member</span> of this group!</div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('joinOverlay').classList.remove('open')">Close</button>
+          <button class="btn btn-primary" style="flex:1" onclick="document.getElementById('joinOverlay').classList.remove('open');showPage('groups')">Go to Group →</button>
+        </div>
+      </div>
+      <!-- Join button state -->
+      <div id="joinActionBox">
+        <div class="join-actions">
+          <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('joinOverlay').classList.remove('open')">Maybe Later</button>
+          <button class="btn btn-primary" style="flex:1" onclick="confirmJoinFromLink()">🎉 Join Group</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN ERROR OVERLAY -->
+<div class="join-overlay" id="joinErrorOverlay">
+  <div class="join-card">
+    <div class="join-body" style="text-align:center;padding:40px 28px">
+      <div style="font-size:3rem;margin-bottom:16px">🔗</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;margin-bottom:10px">Invalid Invite Link</div>
+      <div style="font-size:.88rem;color:var(--ink2);line-height:1.7;margin-bottom:24px">This invite link is expired or the group no longer exists. Ask your friend to send you a fresh invite link!</div>
+      <button class="btn btn-primary btn-full" onclick="document.getElementById('joinErrorOverlay').classList.remove('open')">Go to Homepage</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Invite Friend -->
+<div class="modal-overlay" id="inviteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🎉 Invite Friends</div>
+      <button class="modal-close" onclick="closeModal('inviteModal')">✕</button>
+    </div>
+    <!-- Group context pill -->
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface2);border-radius:var(--rs);border:1px solid var(--border);margin-bottom:20px">
+      <div id="inviteGroupIcon" style="width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:1.5rem;background:var(--accent-bg)"></div>
+      <div>
+        <div id="inviteGroupName" style="font-weight:600;font-size:.95rem"></div>
+        <div id="inviteGroupMembers" style="font-size:.76rem;color:var(--ink3);margin-top:2px"></div>
+      </div>
+    </div>
+    <!-- Invite link -->
+    <div class="fg">
+      <label class="fl">📎 Shareable Invite Link</label>
+      <div class="invite-link-box">
+        <span class="invite-link-text" id="inviteLinkText"></span>
+        <button class="copy-btn" id="copyLinkBtn" onclick="copyInviteLink()">Copy</button>
+      </div>
+      <div style="font-size:.74rem;color:var(--ink3);margin-top:5px">Anyone with this link can join the group instantly.</div>
+    </div>
+    <!-- Share via buttons -->
+    <label class="fl" style="margin-bottom:8px">📤 Share Via</label>
+    <div class="share-row">
+      <button class="share-btn whatsapp" onclick="shareVia('whatsapp')">💬 WhatsApp</button>
+      <button class="share-btn email-s"  onclick="shareVia('email')">📧 Email</button>
+      <button class="share-btn twitter"  onclick="shareVia('twitter')">🐦 Twitter</button>
+    </div>
+    <div class="divider-text">or invite by name / email</div>
+    <!-- Manual invite input -->
+    <div class="fg">
+      <label class="fl">👤 Friend's Name or Email</label>
+      <div class="invite-input-row">
+        <input class="fi" id="inviteInput" placeholder="e.g., Alex or alex@email.com" onkeydown="if(event.key==='Enter')sendInvite()"/>
+        <button class="btn btn-primary btn-sm" onclick="sendInvite()" style="white-space:nowrap;flex-shrink:0">Send Invite ➤</button>
+      </div>
+    </div>
+    <!-- Pending invites list -->
+    <div id="pendingWrap" style="display:none">
+      <label class="fl" style="margin-bottom:10px">📋 Sent Invites</label>
+      <div class="pending-list" id="pendingList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ JS ════════ -->
+<script>
+/* ── DATA ─────────────────────────────────────────── */
+const CATS = [
+  {id:'prog',  name:'Programming',     emoji:'💻', color:'#7c3aed', color2:'#a67ff0', tag:'tag-prog',  desc:'Master coding — from beginner scripting to advanced software engineering.'},
+  {id:'design',name:'Design',          emoji:'🎨', color:'#be185d', color2:'#f06292', tag:'tag-design', desc:'Create stunning visuals, user interfaces and digital experiences.'},
+  {id:'biz',   name:'Business',        emoji:'📊', color:'#d97706', color2:'#f59e0b', tag:'tag-biz',   desc:'Entrepreneurship, finance, marketing and the art of building things.'},
+  {id:'sci',   name:'Science & Math',  emoji:'🔬', color:'#1d4ed8', color2:'#4fb3f6', tag:'tag-sci',   desc:'Explore the laws of nature, mathematics and the universe.'},
+  {id:'lang',  name:'Languages',       emoji:'🌍', color:'#16a34a', color2:'#3ecfb2', tag:'tag-lang',  desc:'Speak new languages, connect with cultures around the world.'},
+  {id:'fit',   name:'Health & Fitness',emoji:'💪', color:'#dc2626', color2:'#ff7d6b', tag:'tag-fit',   desc:'Build strength, wellness habits and a healthy mind-body balance.'},
+  {id:'music', name:'Music & Arts',    emoji:'🎵', color:'#ca8a04', color2:'#f5a623', tag:'tag-music', desc:'Play instruments, compose music and explore creative arts.'},
+  {id:'write', name:'Writing',         emoji:'✍️', color:'#0369a1', color2:'#38bdf8', tag:'tag-write', desc:'Craft compelling stories, essays, scripts and professional content.'},
+  {id:'hist',  name:'History',         emoji:'🏛️', color:'#9333ea', color2:'#c084fc', tag:'tag-hist',  desc:'Journey through civilizations, revolutions and the story of humanity.'},
+  {id:'dev',   name:'Personal Dev',    emoji:'🧘', color:'#ea580c', color2:'#fb923c', tag:'tag-dev',   desc:'Build confidence, habits, leadership and a growth mindset.'},
+];
+
+const TOPICS = [
+  {id:'t1',  name:'Python Programming',      cat:'prog',  emoji:'🐍', desc:'Learn Python from basics to advanced — scripts, automation and data work.',status:'planned',custom:false},
+  {id:'t2',  name:'Web Development',         cat:'prog',  emoji:'🌐', desc:'HTML, CSS, JavaScript & modern frameworks like React and Vue.',            status:'planned',custom:false},
+  {id:'t3',  name:'Data Structures',         cat:'prog',  emoji:'🗂️', desc:'Arrays, trees, graphs, algorithms — the backbone of every program.',       status:'planned',custom:false},
+  {id:'t4',  name:'Machine Learning',        cat:'prog',  emoji:'🤖', desc:'AI, neural networks and real-world ML models using Python.',               status:'planned',custom:false},
+  {id:'t5',  name:'UI/UX Design',            cat:'design',emoji:'🖌️', desc:'Design beautiful, user-friendly interfaces that people love.',             status:'planned',custom:false},
+  {id:'t6',  name:'Figma',                   cat:'design',emoji:'🎭', desc:'Master the #1 design tool used by professionals worldwide.',               status:'planned',custom:false},
+  {id:'t7',  name:'Photography',             cat:'design',emoji:'📷', desc:'Composition, lighting, editing — the art of capturing moments.',          status:'planned',custom:false},
+  {id:'t8',  name:'Entrepreneurship',        cat:'biz',   emoji:'🚀', desc:'Start and grow your own business from idea to launch.',                   status:'planned',custom:false},
+  {id:'t9',  name:'Financial Literacy',      cat:'biz',   emoji:'💰', desc:'Understand money, investing, budgeting and building wealth.',             status:'planned',custom:false},
+  {id:'t10', name:'Digital Marketing',       cat:'biz',   emoji:'📣', desc:'SEO, ads, social media and growth hacking strategies.',                   status:'planned',custom:false},
+  {id:'t11', name:'Calculus',                cat:'sci',   emoji:'📐', desc:'Derivatives, integrals and real-world applications of math.',             status:'planned',custom:false},
+  {id:'t12', name:'Physics',                 cat:'sci',   emoji:'⚛️', desc:'Classical mechanics to quantum theory — how the universe works.',         status:'planned',custom:false},
+  {id:'t13', name:'Spanish',                 cat:'lang',  emoji:'🇪🇸', desc:'Speak Spanish fluently through vocabulary, grammar and conversation.',    status:'planned',custom:false},
+  {id:'t14', name:'Japanese',                cat:'lang',  emoji:'🇯🇵', desc:'Hiragana, katakana, kanji and natural conversational Japanese.',          status:'planned',custom:false},
+  {id:'t15', name:'Yoga & Meditation',       cat:'fit',   emoji:'🧘', desc:'Build flexibility, strength and inner peace through practice.',           status:'planned',custom:false},
+  {id:'t16', name:'Nutrition Science',       cat:'fit',   emoji:'🥗', desc:'Understand food, macros and the science of healthy eating.',              status:'planned',custom:false},
+  {id:'t17', name:'Guitar',                  cat:'music', emoji:'🎸', desc:'From beginner chords to full songs — acoustic and electric.',             status:'planned',custom:false},
+  {id:'t18', name:'Piano',                   cat:'music', emoji:'🎹', desc:'Read sheet music, play melodies and build musical ear.',                  status:'planned',custom:false},
+  {id:'t19', name:'Creative Writing',        cat:'write', emoji:'📝', desc:'Storytelling, character building, narrative craft and voice.',            status:'planned',custom:false},
+  {id:'t20', name:'Ancient History',         cat:'hist',  emoji:'🏺', desc:'Civilizations from Egypt to Greece to Rome and beyond.',                 status:'planned',custom:false},
+  {id:'t21', name:'Public Speaking',         cat:'dev',   emoji:'🎤', desc:'Overcome fear and speak with confidence in any room.',                   status:'planned',custom:false},
+  {id:'t22', name:'Time Management',         cat:'dev',   emoji:'⏰', desc:'Productivity systems, deep work and getting the right things done.',      status:'planned',custom:false},
+];
+
+const QUOTES = [
+  '"The beautiful thing about learning is nobody can take it away from you." — B.B. King',
+  '"An investment in knowledge pays the best interest." — Benjamin Franklin',
+  '"Live as if you were to die tomorrow. Learn as if you were to live forever." — Gandhi',
+  '"Learning never exhausts the mind." — Leonardo da Vinci',
+  '"The capacity to learn is a gift; the ability to learn is a skill." — Brian Herbert',
+  '"Education is not the filling of a pot but the lighting of a fire." — W.B. Yeats',
+];
+const ICONS = ['📚','💡','🎯','🔥','⚡','🌟','🏆','🎓','🔬','🎨','🌱','🚀','💎','🦋','🧩','🎭','🌈','✨','🔑','🌍'];
+const GCOLORS = ['#7c5cbf','#ff7d6b','#3ecfb2','#f5a623','#4fb3f6','#f06292','#66bb6a','#ab47bc'];
+
+let S = {
+  topics: [...TOPICS],
+  myTopics: [],
+  activeCat: null,
+  catFilter: 'all',
+  searchQ: '',
+  prevPage: 'discover',
+  groups: [
+    {id:'g1',name:'Python Wizards',emoji:'🐍',desc:'Learning Python together from basics to machine learning projects.',cat:'prog',color:'#7c5cbf',members:['A','B','C'],joined:false,invites:[],messages:[
+      {from:'Alice',color:'#7c5cbf',text:'Hey everyone! Ready to learn Python?',time:'10:30 AM',mine:false},
+      {from:'Bob',color:'#3ecfb2',text:'Absolutely! Starting with functions today 🙌',time:'10:32 AM',mine:false},
+    ]},
+    {id:'g2',name:'Design Squad',emoji:'🎨',desc:'UI/UX designers sharing resources, feedback and creative tips.',cat:'design',color:'#f06292',members:['D','E'],joined:false,invites:[],messages:[
+      {from:'Diana',color:'#f06292',text:'Just finished my first Figma prototype! 🎉',time:'9:15 AM',mine:false},
+    ]},
+    {id:'g3',name:'Language Learners',emoji:'🌍',desc:'Practicing Spanish, Japanese and French together daily.',cat:'lang',color:'#3ecfb2',members:['F','G','H','I'],joined:false,invites:[],messages:[
+      {from:'Fatima',color:'#3ecfb2',text:'¡Buenos días a todos! 🇪🇸',time:'8:00 AM',mine:false},
+    ]},
+  ],
+  activeGroup: null,
+  inviteGroupId: null,
+  groupFilter: 'all',
+  selEmoji: '📚',
+  gEmoji: '👥',
+  gColor: '#7c5cbf',
+  qaFilter: 'all',
+  activeQId: null,
+  questions: [
+    {id:'q1',title:'What is the difference between a list and a tuple in Python?',body:'I keep confusing these two. When should I use a list vs a tuple? Is there a performance difference?',cat:'prog',author:'Alex',votes:14,answers:[
+      {id:'a1',text:'A list is mutable (you can change it after creation) while a tuple is immutable (cannot be changed). Use tuples for fixed data like coordinates or RGB values, and lists when you need to add/remove items.\n\nTuples are also slightly faster than lists for iteration.',author:'Priya',votes:9,best:true},
+      {id:'a2',text:'Simple rule: if your data should not change, use a tuple. If it might change, use a list. Tuples can also be used as dictionary keys because they are hashable, while lists cannot.',author:'Sam',votes:5,best:false},
+    ],time:'2h ago',solved:true},
+    {id:'q2',title:'How do I stay motivated when learning a new language?',body:"I started Spanish 3 months ago and I'm losing motivation. Any tips from people who've successfully learned a language?",cat:'lang',author:'Maria',votes:11,answers:[
+      {id:'a3',text:'Change your environment! Watch Spanish Netflix shows (with Spanish subtitles, not English). Your brain starts to associate the language with entertainment rather than "study".',author:'Carlos',votes:7,best:true},
+      {id:'a4',text:'Set a micro-goal: just 10 minutes a day. Consistency beats intensity. After 30 days it becomes a habit.',author:'Ji-ho',votes:4,best:false},
+    ],time:'5h ago',solved:true},
+    {id:'q3',title:'Best resources to learn UI/UX design from scratch?',body:'I am a complete beginner in design. What courses, tools, or YouTube channels would you recommend?',cat:'design',author:'Rohan',votes:8,answers:[
+      {id:'a5',text:'Start with the Google UX Design certificate on Coursera — it is free to audit and very beginner friendly. Then practice by redesigning apps you use daily.',author:'Neha',votes:6,best:false},
+    ],time:'1d ago',solved:false},
+    {id:'q4',title:'How to solve quadratic equations step by step?',body:'My exam is tomorrow and I am still struggling with quadratic equations. Can someone explain both the formula method and factoring?',cat:'sci',author:'Aisha',votes:6,answers:[],time:'3h ago',solved:false},
+    {id:'q5',title:'What is compound interest and how do I calculate it?',body:'I want to understand personal finance better. Can someone explain compound interest with a simple example?',cat:'biz',author:'David',votes:4,answers:[
+      {id:'a6',text:'Compound interest = P × (1 + r/n)^(nt)\nWhere P = principal, r = annual rate, n = times compounded per year, t = years.\n\nExample: ₹10,000 at 8% compounded yearly for 5 years = 10000 × (1.08)^5 ≈ ₹14,693. Your money grew by ₹4,693!',author:'Finance_Nerd',votes:8,best:true},
+    ],time:'2d ago',solved:true},
+    {id:'q6',title:'How do I overcome stage fright before public speaking?',body:'I have to give a presentation next week and I am terrified. Heart racing, mind goes blank. Any practical advice?',cat:'dev',author:'Lena',votes:9,answers:[],time:'6h ago',solved:false},
+  ],
+};
+
+/* ── INIT ──────────────────────────────────────────── */
+window.onload = () => {
+  // set initial display — all pages hidden except discover
+  document.querySelectorAll('.page').forEach(p=>{
+    p.style.display = p.id==='page-discover' ? 'block' : 'none';
+    if(p.id==='page-discover') p.classList.add('active');
+  });
+  renderCatGrid();
+  renderQuote();
+  populateAllSelects();
+  buildEmojiPicker('emojiPick','selEmoji');
+  buildEmojiPicker('gEmojiPick','gEmoji');
+  buildColorPicker();
+  setInterval(renderQuote, 6000);
+  checkInviteHash();
+};
+
+/* ── QUOTE ─────────────────────────────────────────── */
+function renderQuote(){
+  const el = document.getElementById('quoteBar');
+  el.style.opacity=0;
+  setTimeout(()=>{ el.textContent=QUOTES[Math.floor(Math.random()*QUOTES.length)]; el.style.opacity=1; },400);
+}
+
+/* ── INVITE HASH HANDLER ───────────────────────────── */
+function checkInviteHash(){
+  const hash = window.location.hash; // e.g. #join=g1
+  const match = hash.match(/^#join=(.+)$/);
+  if(!match) return;
+  const groupId = match[1];
+  const g = S.groups.find(g=>g.id===groupId);
+  // clear hash from URL cleanly
+  history.replaceState(null,'', window.location.pathname + window.location.search);
+  if(!g){
+    showJoinError();
+    return;
+  }
+  // show the join overlay after a short delay so the page renders first
+  setTimeout(()=> showJoinOverlay(g), 500);
+}
+
+function showJoinOverlay(g){
+  const cat = getCat(g.cat);
+  // set banner gradient to group colour
+  document.getElementById('joinOverlayBanner').style.background =
+    `linear-gradient(135deg, ${g.color}, ${g.color}bb)`;
+  document.getElementById('joinOverlayIcon').textContent = g.emoji;
+  document.getElementById('joinOverlayName').textContent = g.name;
+  document.getElementById('joinOverlayDesc').textContent = g.desc;
+  document.getElementById('joinOverlayCat').textContent = cat.emoji+' '+cat.name;
+  document.getElementById('joinOverlayMembers').textContent = '👥 '+g.members.length+' member'+(g.members.length>1?'s':'');
+  // already joined vs fresh join
+  document.getElementById('joinAlreadyBox').style.display = g.joined ? 'block' : 'none';
+  document.getElementById('joinActionBox').style.display  = g.joined ? 'none'  : 'block';
+  S._pendingJoinId = g.id;
+  document.getElementById('joinOverlay').classList.add('open');
+}
+
+function confirmJoinFromLink(){
+  const g = S.groups.find(g=>g.id===S._pendingJoinId);
+  if(!g) return;
+  if(!g.joined){
+    g.joined = true;
+    g.members.push('You');
+  }
+  document.getElementById('joinOverlay').classList.remove('open');
+  showPage('groups');
+  renderGroups();
+  showToast(`Welcome to "${g.name}"! 🎉`,'success');
+}
+
+function showJoinError(){
+  document.getElementById('joinErrorOverlay').classList.add('open');
+}
+
+/* ── PAGE NAVIGATION ───────────────────────────────── */
+function showPage(id, from){
+  // handle support page (outside .app)
+  document.querySelectorAll('.page').forEach(p=>{ p.classList.remove('active'); p.style.display='none'; });
+  const pg = document.getElementById('page-'+id);
+  if(pg){ pg.classList.add('active'); pg.style.display='block'; }
+
+  // update nav tabs
+  const order=['discover','mylearning','groups','qa'];
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active', order[i]===id));
+  document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.remove('active'));
+  const mt=document.getElementById('mt-'+id);
+  if(mt) mt.classList.add('active');
+  if(id==='category'){
+    document.querySelectorAll('.nav-tab')[0].classList.add('active');
+    const dm=document.getElementById('mt-discover');
+    if(dm) dm.classList.add('active');
+  }
+
+  // hide float widget on support page
+  const fw = document.getElementById('supportFloat');
+  if(fw) fw.style.display = (id==='support')?'none':'flex';
+
+  if(id==='mylearning') renderMyLearning();
+  if(id==='groups') renderGroups();
+  if(id==='qa'){ renderQAFilters(); filterQA(); updateQAStats(); }
+  if(id==='support') initSupportPage();
+  if(from) S.prevPage=from;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goBack(){ showPage(S.prevPage||'discover'); }
+
+/* ── CATEGORIES HOMEPAGE ────────────────────────────── */
+function renderCatGrid(){
+  const grid=document.getElementById('catGrid');
+  grid.innerHTML=CATS.map((c,i)=>{
+    const cnt=S.topics.filter(t=>t.cat===c.id).length;
+    return `<div class="cat-card" style="--cc:${c.color};animation-delay:${i*.05}s" onclick="openCategory('${c.id}')">
+      <span class="cat-emoji">${c.emoji}</span>
+      <div class="cat-name">${c.name}</div>
+      <div class="cat-count">${cnt} topics available</div>
+      <div class="cat-arrow">→</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── OPEN CATEGORY PAGE ─────────────────────────────── */
+function openCategory(catId){
+  S.activeCat=catId;
+  S.catFilter='all';
+  // reset filter pills
+  document.querySelectorAll('#catStatusFilter .filter-pill').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#catStatusFilter .filter-pill')[0].classList.add('active');
+
+  const cat=getCat(catId);
+
+  // populate hero
+  document.getElementById('breadcrumbCat').textContent=cat.name;
+  document.getElementById('catHeroEmoji').textContent=cat.emoji;
+  document.getElementById('catHeroName').textContent=cat.name;
+  document.getElementById('catHeroDesc').textContent=cat.desc;
+
+  // hero gradient
+  const card=document.getElementById('catHeroCard');
+  card.style.background=`linear-gradient(135deg, ${cat.color}, ${cat.color2})`;
+
+  // stats
+  updateCatStats(catId);
+
+  // pre-fill add modal category
+  const sel=document.getElementById('newCat');
+  if(sel){ sel.value=catId; }
+
+  // render topics
+  renderCatTopics();
+
+  showPage('category','discover');
+}
+
+function updateCatStats(catId){
+  const all=S.topics.filter(t=>t.cat===catId);
+  const added=all.filter(t=>S.myTopics.includes(t.id)).length;
+  const done=all.filter(t=>t.status==='done').length;
+  document.getElementById('catStatTotal').textContent=all.length;
+  document.getElementById('catStatAdded').textContent=added;
+  document.getElementById('catStatDone').textContent=done;
+}
+
+function renderCatTopics(){
+  const grid=document.getElementById('catTopicGrid');
+  const noRes=document.getElementById('catNoRes');
+  let topics=S.topics.filter(t=>t.cat===S.activeCat);
+  if(S.catFilter!=='all') topics=topics.filter(t=>t.status===S.catFilter);
+  if(topics.length===0){ grid.innerHTML=''; noRes.style.display='block'; }
+  else{ noRes.style.display='none'; grid.innerHTML=topics.map((t,i)=>topicCardHTML(t,i)).join(''); }
+  updateCatStats(S.activeCat);
+}
+
+function setCatFilter(val,btn){
+  S.catFilter=val;
+  document.querySelectorAll('#catStatusFilter .filter-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  renderCatTopics();
+}
+
+/* ── TOPIC CARD ─────────────────────────────────────── */
+function topicCardHTML(t,i=0){
+  const cat=getCat(t.cat);
+  const statusLabel={planned:'📋 Planned',learning:'🎓 Learning',done:'✅ Done'}[t.status];
+  const statusClass={planned:'st-planned',learning:'st-learning',done:'st-done'}[t.status];
+  const added=S.myTopics.includes(t.id);
+  return `<div class="topic-card" style="animation-delay:${i*.04}s" id="tc-${t.id}">
+    <div class="tc-top">
+      <div class="tc-icon" style="background:${cat.color}22">${t.emoji}</div>
+      <div class="tc-actions">
+        <button class="tc-btn" onclick="openEdit('${t.id}')" title="Edit">✏️</button>
+        <button class="tc-btn danger" onclick="deleteTopic('${t.id}')" title="Delete">🗑️</button>
+      </div>
+    </div>
+    <div class="tc-name">${t.name}</div>
+    <div class="tc-desc">${t.desc||'A great topic to explore and master.'}</div>
+    <div class="tc-footer">
+      <span class="topic-tag ${cat.tag}">${cat.emoji} ${cat.name}</span>
+      <span class="topic-status ${statusClass}" onclick="cycleStatus('${t.id}')" title="Click to change">${statusLabel}</span>
+    </div>
+    <button class="tc-add-btn ${added?'added':''}" onclick="toggleMy('${t.id}')">
+      ${added?'✓ Added to My Learning':'＋ Add to My Learning'}
+    </button>
+  </div>`;
+}
+
+/* ── TOPIC ACTIONS ──────────────────────────────────── */
+function cycleStatus(id){
+  const t=S.topics.find(t=>t.id===id);
+  const o=['planned','learning','done'];
+  t.status=o[(o.indexOf(t.status)+1)%o.length];
+  rerenderTopic(t);
+  updateCatStats(S.activeCat||t.cat);
+  renderMyLearning();
+  showToast(`Status → ${t.status} 🔄`,'success');
+}
+
+function toggleMy(id){
+  const idx=S.myTopics.indexOf(id);
+  if(idx===-1){ S.myTopics.push(id); showToast('Added to My Learning! 🎉','success'); }
+  else{ S.myTopics.splice(idx,1); showToast('Removed from My Learning',''); }
+  rerenderTopic(S.topics.find(t=>t.id===id));
+  if(S.activeCat) updateCatStats(S.activeCat);
+}
+
+function rerenderTopic(t){
+  const el=document.getElementById('tc-'+t.id);
+  if(el){ const tmp=document.createElement('div'); tmp.innerHTML=topicCardHTML(t); el.replaceWith(tmp.firstElementChild); }
+}
+
+function deleteTopic(id){
+  if(!confirm('Delete this topic?')) return;
+  S.topics=S.topics.filter(t=>t.id!==id);
+  S.myTopics=S.myTopics.filter(i=>i!==id);
+  renderCatTopics(); renderCatGrid(); renderMyLearning();
+  showToast('Topic deleted','error');
+}
+
+/* ── SEARCH ─────────────────────────────────────────── */
+function handleSearch(inp){
+  S.searchQ=inp.value.trim().toLowerCase();
+  document.getElementById('searchClear').classList.toggle('show',inp.value.length>0);
+  const searching=S.searchQ.length>0;
+  document.getElementById('catSection').style.display=searching?'none':'block';
+  document.getElementById('searchResultsSection').style.display=searching?'block':'none';
+  if(searching) renderSearchResults();
+}
+function clearSearch(){
+  document.getElementById('searchBar').value='';
+  S.searchQ='';
+  document.getElementById('searchClear').classList.remove('show');
+  document.getElementById('catSection').style.display='block';
+  document.getElementById('searchResultsSection').style.display='none';
+}
+function renderSearchResults(){
+  const results=S.topics.filter(t=>
+    t.name.toLowerCase().includes(S.searchQ)||
+    (t.desc||'').toLowerCase().includes(S.searchQ)||
+    getCat(t.cat).name.toLowerCase().includes(S.searchQ)
+  );
+  const grid=document.getElementById('searchResultsGrid');
+  const nr=document.getElementById('searchNoRes');
+  if(results.length===0){ grid.innerHTML=''; nr.style.display='block'; }
+  else{ nr.style.display='none'; grid.innerHTML=results.map((t,i)=>topicCardHTML(t,i)).join(''); }
+}
+
+/* ── MY LEARNING ─────────────────────────────────────── */
+function renderMyLearning(){
+  const grid=document.getElementById('myTopicGrid');
+  const empty=document.getElementById('myEmpty');
+  const mine=S.topics.filter(t=>S.myTopics.includes(t.id));
+  if(mine.length===0){ grid.innerHTML=''; empty.style.display='block'; }
+  else{ empty.style.display='none'; grid.innerHTML=mine.map((t,i)=>topicCardHTML(t,i)).join(''); }
+  updateProgress(mine);
+}
+function updateProgress(topics){
+  const total=topics.length;
+  const done=topics.filter(t=>t.status==='done').length;
+  const learning=topics.filter(t=>t.status==='learning').length;
+  const planned=topics.filter(t=>t.status==='planned').length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('stPlanned').textContent=planned;
+  document.getElementById('stLearning').textContent=learning;
+  document.getElementById('stDone').textContent=done;
+  document.getElementById('stTotal').textContent=total;
+}
+
+/* ── ADD CUSTOM TOPIC ────────────────────────────────── */
+function openAddModal(){
+  populateSelect('newCat', S.activeCat||'prog');
+  openModal('addModal');
+}
+function saveNewTopic(){
+  const name=document.getElementById('newName').value.trim();
+  const desc=document.getElementById('newDesc').value.trim();
+  const cat=document.getElementById('newCat').value;
+  const status=document.getElementById('newStatus').value;
+  if(!name){ showToast('Please enter a topic name','error'); return; }
+  const id='c'+Date.now();
+  S.topics.push({id,name,desc,cat,status,emoji:S.selEmoji,custom:true});
+  closeModal('addModal');
+  document.getElementById('newName').value='';
+  document.getElementById('newDesc').value='';
+  if(S.activeCat&&cat===S.activeCat) renderCatTopics();
+  renderCatGrid();
+  showToast(`"${name}" added! 🎉`,'success');
+}
+
+/* ── EDIT TOPIC ──────────────────────────────────────── */
+function openEdit(id){
+  const t=S.topics.find(t=>t.id===id);
+  document.getElementById('editId').value=id;
+  document.getElementById('editName').value=t.name;
+  document.getElementById('editDesc').value=t.desc||'';
+  populateSelect('editCat',t.cat);
+  document.getElementById('editStatus').value=t.status;
+  openModal('editModal');
+}
+function saveEdit(){
+  const id=document.getElementById('editId').value;
+  const t=S.topics.find(t=>t.id===id);
+  t.name=document.getElementById('editName').value.trim()||t.name;
+  t.desc=document.getElementById('editDesc').value.trim();
+  t.cat=document.getElementById('editCat').value;
+  t.status=document.getElementById('editStatus').value;
+  closeModal('editModal');
+  if(S.activeCat) renderCatTopics();
+  renderMyLearning();
+  renderCatGrid();
+  showToast('Topic updated ✨','success');
+}
+
+/* ── GROUPS ──────────────────────────────────────────── */
+function renderGroups(){
+  const grid=document.getElementById('groupsGrid');
+  let groups=S.groups;
+  if(S.groupFilter==='joined') groups=groups.filter(g=>g.joined);
+  if(groups.length===0){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">👥</div><h3>No groups yet</h3><p>Create a study group or join one!</p></div>`;
+    return;
+  }
+  grid.innerHTML=groups.map((g,i)=>{
+    const avs=g.members.slice(0,4).map(m=>`<div class="mav" style="background:${rColor(m)}">${m}</div>`).join('');
+    return `<div class="group-card" style="animation-delay:${i*.06}s" onclick="openChat('${g.id}')">
+      <div class="group-banner" style="background:linear-gradient(135deg,${g.color},${g.color}99)">
+        <div style="font-size:2rem">${g.emoji}</div>
+        <div class="group-banner-name">${g.name}</div>
+      </div>
+      <div class="group-body">
+        <div class="group-desc">${g.desc}</div>
+        <div class="group-meta">
+          <div class="group-members"><div class="mavs">${avs}</div>${g.members.length} member${g.members.length>1?'s':''}</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${g.joined?`<button class="invite-btn" onclick="event.stopPropagation();openInviteModal('${g.id}')">✉️ Invite</button>`:''}
+            <button class="btn btn-sm ${g.joined?'btn-outline':'btn-primary'}" onclick="event.stopPropagation();joinGroup('${g.id}')">${g.joined?'✓ Joined':'Join'}</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function setGroupFilter(val,btn){
+  S.groupFilter=val;
+  document.querySelectorAll('#groupFilter .filter-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active'); renderGroups();
+}
+function joinGroup(id){
+  const g=S.groups.find(g=>g.id===id);
+  g.joined=!g.joined;
+  if(g.joined){g.members.push('You');showToast(`Joined "${g.name}"! 🎉`,'success');}
+  else{g.members=g.members.filter(m=>m!=='You');showToast(`Left "${g.name}"`,'');}
+  renderGroups();
+}
+function openChat(id){
+  S.activeGroup=id;
+  const g=S.groups.find(g=>g.id===id);
+  document.getElementById('chatGName').textContent=g.emoji+' '+g.name;
+  document.getElementById('chatGSub').textContent=g.members.length+' members';
+  renderChatMsgs(g);
+  document.getElementById('chatPanel').classList.add('open');
+}
+function closeChat(){document.getElementById('chatPanel').classList.remove('open')}
+function renderChatMsgs(g){
+  const c=document.getElementById('chatMessages');
+  c.innerHTML=g.messages.map(m=>`
+    <div class="chat-msg ${m.mine?'mine':''}">
+      <div class="msg-av" style="background:${m.color}">${m.from[0]}</div>
+      <div>
+        ${!m.mine?`<div style="font-size:.72rem;color:var(--ink3);margin-bottom:3px">${m.from}</div>`:''}
+        <div class="msg-bubble">${m.text}</div>
+        <div class="msg-time">${m.time}</div>
+      </div>
+    </div>`).join('');
+  c.scrollTop=c.scrollHeight;
+}
+function sendChat(){
+  const inp=document.getElementById('chatInput');
+  const text=inp.value.trim();
+  if(!text||!S.activeGroup) return;
+  const g=S.groups.find(g=>g.id===S.activeGroup);
+  const now=new Date();
+  g.messages.push({from:'You',color:'#7c5cbf',text,time:now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),mine:true});
+  inp.value=''; renderChatMsgs(g);
+}
+function openCreateGroup(){
+  populateSelect('gCat');
+  openModal('createGroupModal');
+}
+function saveGroup(){
+  const name=document.getElementById('gName').value.trim();
+  const desc=document.getElementById('gDesc').value.trim();
+  const cat=document.getElementById('gCat').value;
+  if(!name){showToast('Enter a group name','error');return;}
+  S.groups.push({id:'g'+Date.now(),name,desc:desc||'A great study group!',emoji:S.gEmoji,cat,color:S.gColor,members:['You'],joined:true,messages:[]});
+  closeModal('createGroupModal');
+  document.getElementById('gName').value='';document.getElementById('gDesc').value='';
+  renderGroups();showToast(`"${name}" created! 🎉`,'success');
+}
+
+/* ── INVITE FRIEND ───────────────────────────────────── */
+function openInviteModal(groupId){
+  S.inviteGroupId = groupId;
+  const g = S.groups.find(g=>g.id===groupId);
+  if(!g) return;
+
+  // populate group context
+  document.getElementById('inviteGroupIcon').textContent = g.emoji;
+  document.getElementById('inviteGroupIcon').style.background = g.color+'22';
+  document.getElementById('inviteGroupName').textContent = g.name;
+  document.getElementById('inviteGroupMembers').textContent = `${g.members.length} member${g.members.length>1?'s':''} · ${getCat(g.cat).name}`;
+
+  // generate real working invite link using current page URL + hash
+  const base = window.location.href.split('#')[0];
+  const link = `${base}#join=${g.id}`;
+  document.getElementById('inviteLinkText').textContent = link;
+  document.getElementById('copyLinkBtn').textContent = 'Copy';
+  document.getElementById('copyLinkBtn').classList.remove('copied');
+
+  // clear input
+  document.getElementById('inviteInput').value = '';
+
+  // init invites list for this group
+  if(!g.invites) g.invites = [];
+  renderPendingList(g);
+
+  openModal('inviteModal');
+}
+
+function copyInviteLink(){
+  const link = document.getElementById('inviteLinkText').textContent;
+  // update the actual browser URL hash so the link is live immediately
+  history.replaceState(null,'', '#join=' + S.inviteGroupId);
+  // copy to clipboard with fallback
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(link).catch(()=>fallbackCopy(link));
+  } else { fallbackCopy(link); }
+  const btn = document.getElementById('copyLinkBtn');
+  btn.textContent = '✓ Copied!';
+  btn.classList.add('copied');
+  setTimeout(()=>{ btn.textContent='Copy'; btn.classList.remove('copied'); }, 2500);
+  showToast('Invite link copied! Share it with your friend 🔗','success');
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{document.execCommand('copy')}catch(e){}
+  document.body.removeChild(ta);
+}
+
+function shareVia(platform){
+  const g = S.groups.find(g=>g.id===S.inviteGroupId);
+  const base = window.location.href.split('#')[0];
+  const link = `${base}#join=${g.id}`;
+  const msg = encodeURIComponent(`Hey! Join my study group "${g.name}" on LearnLab 🎓\n${link}`);
+  const urls = {
+    whatsapp: `https://wa.me/?text=${msg}`,
+    email:    `mailto:?subject=${encodeURIComponent('Join my study group on LearnLab!')}&body=${msg}`,
+    twitter:  `https://twitter.com/intent/tweet?text=${msg}`,
+  };
+  window.open(urls[platform],'_blank');
+}
+
+function sendInvite(){
+  const g = S.groups.find(g=>g.id===S.inviteGroupId);
+  const val = document.getElementById('inviteInput').value.trim();
+  if(!val){ showToast('Enter a name or email','error'); return; }
+  if(!g.invites) g.invites = [];
+  // prevent duplicate
+  if(g.invites.some(i=>i.name.toLowerCase()===val.toLowerCase())){
+    showToast('Already invited!','error'); return;
+  }
+  const isEmail = val.includes('@');
+  g.invites.push({
+    id: 'inv'+Date.now(),
+    name: val,
+    type: isEmail ? 'email' : 'name',
+    status: 'pending',
+    time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
+  });
+  document.getElementById('inviteInput').value = '';
+  renderPendingList(g);
+  showToast(`Invite sent to ${val}! 🎉`,'success');
+
+  // simulate acceptance after random delay for realism
+  if(Math.random() > 0.4){
+    const inv = g.invites[g.invites.length-1];
+    setTimeout(()=>{
+      inv.status = 'accepted';
+      g.members.push(val.split(' ')[0].slice(0,6));
+      renderPendingList(g);
+      renderGroups();
+      showToast(`${val} accepted your invite! 🎊`,'success');
+    }, 4000 + Math.random()*4000);
+  }
+}
+
+function renderPendingList(g){
+  const wrap = document.getElementById('pendingWrap');
+  const list = document.getElementById('pendingList');
+  if(!g.invites || g.invites.length===0){ wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = g.invites.map(inv=>`
+    <div class="pending-item">
+      <div class="pending-av" style="background:${rColor(inv.name)}">${inv.name[0].toUpperCase()}</div>
+      <div class="pending-info">
+        <div class="pending-name">${inv.name}</div>
+        <div class="pending-status">${inv.type==='email'?'📧 Email invite':'👤 Name invite'} · ${inv.time}</div>
+      </div>
+      <span class="pending-badge ${inv.status==='accepted'?'badge-accepted':'badge-pending'}">
+        ${inv.status==='accepted'?'✓ Accepted':'⏳ Pending'}
+      </span>
+    </div>`).join('');
+}
+
+/* ══ Q&A FUNCTIONS ══════════════════════════════════ */
+
+function updateQAStats(){
+  const qs = S.questions;
+  document.getElementById('qStatTotal').textContent   = qs.length;
+  document.getElementById('qStatAnswered').textContent = qs.filter(q=>q.answers.length>0).length;
+  document.getElementById('qStatAnswers').textContent  = qs.reduce((s,q)=>s+q.answers.length,0);
+}
+
+/* category filter pills for Q&A */
+function renderQAFilters(){
+  const wrap = document.getElementById('qaFilters');
+  const cats  = ['all', ...new Set(S.questions.map(q=>q.cat))];
+  wrap.innerHTML = cats.map(c=>{
+    const label = c==='all' ? 'All Categories' : getCat(c).emoji+' '+getCat(c).name;
+    return `<button class="filter-pill ${S.qaFilter===c?'active':''}" onclick="setQAFilter('${c}',this)">${label}</button>`;
+  }).join('');
+}
+
+function setQAFilter(val,btn){
+  S.qaFilter=val;
+  document.querySelectorAll('#qaFilters .filter-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  filterQA();
+}
+
+function filterQA(){
+  const search = (document.getElementById('qaSearch')||{value:''}).value.trim().toLowerCase();
+  const sort   = (document.getElementById('qaSort')||{value:'newest'}).value;
+  let qs = [...S.questions];
+
+  if(S.qaFilter!=='all') qs = qs.filter(q=>q.cat===S.qaFilter);
+  if(search) qs = qs.filter(q=>q.title.toLowerCase().includes(search)||q.body.toLowerCase().includes(search));
+
+  if(sort==='votes')      qs.sort((a,b)=>b.votes-a.votes);
+  else if(sort==='unanswered') qs = qs.filter(q=>q.answers.length===0);
+  else if(sort==='answered')   qs = qs.filter(q=>q.answers.length>0);
+  // newest = default order (most recently added last in array = show first)
+  else qs.reverse();
+
+  renderQAList(qs);
+  updateQAStats();
+}
+
+function renderQAList(qs){
+  const list = document.getElementById('qaList');
+  if(qs.length===0){
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><h3>No questions found</h3><p>Try a different filter or <button onclick="openAskModal()" style="color:var(--accent);font-weight:600;cursor:pointer">ask the first question!</button></p></div>`;
+    return;
+  }
+  list.innerHTML = qs.map((q,i)=>{
+    const cat = getCat(q.cat);
+    const hasAns = q.answers.length>0;
+    return `<div class="q-card" style="animation-delay:${i*.04}s">
+      <div class="q-card-main" onclick="openQuestion('${q.id}')">
+        <div class="q-vote" onclick="event.stopPropagation()">
+          <button class="vote-up ${q._myVote===1?'voted':''}" onclick="voteQ('${q.id}',1)">▲</button>
+          <span class="vote-count">${q.votes}</span>
+          <button class="vote-dn ${q._myVote===-1?'voted':''}" onclick="voteQ('${q.id}',-1)">▼</button>
+        </div>
+        <div class="q-body">
+          <div class="q-title">${q.title}</div>
+          <div class="q-excerpt">${q.body||'No description provided.'}</div>
+          <div class="q-meta">
+            <span class="q-tag ${cat.tag}">${cat.emoji} ${cat.name}</span>
+            <span class="q-author">
+              <span class="q-author-av" style="background:${rColor(q.author)}">${q.author[0]}</span>
+              ${q.author}
+            </span>
+            <span class="q-time">🕐 ${q.time}</span>
+          </div>
+        </div>
+        <div class="q-ans-badge">
+          <div class="q-ans-num ${hasAns?'has-ans':''}">${q.answers.length}</div>
+          <div class="q-ans-lbl ${hasAns?'has-ans':''}">${hasAns?'answer'+(q.answers.length>1?'s':''):'No answers'}</div>
+          ${q.solved?'<div class="q-solved-tick" title="Has best answer">✅</div>':''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function voteQ(id, dir){
+  const q = S.questions.find(q=>q.id===id);
+  if(q._myVote===dir){ q.votes-=dir; q._myVote=0; }
+  else { q.votes += q._myVote?dir*2:dir; q._myVote=dir; }
+  filterQA();
+}
+
+/* ── Open a question detail ── */
+function openQuestion(id){
+  S.activeQId = id;
+  const q = S.questions.find(q=>q.id===id);
+  document.getElementById('qa-list-view').style.display   = 'none';
+  document.getElementById('qa-detail-view').style.display = 'block';
+  renderQuestionDetail(q);
+  document.getElementById('answerInput').value='';
+  document.getElementById('ansCharCount').textContent='0/1000';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function closeQuestionDetail(){
+  S.activeQId=null;
+  document.getElementById('qa-list-view').style.display   = 'block';
+  document.getElementById('qa-detail-view').style.display = 'none';
+  filterQA();
+}
+
+function renderQuestionDetail(q){
+  const cat = getCat(q.cat);
+  // render question card
+  document.getElementById('qdQuestion').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+      <span class="q-tag ${cat.tag}" style="font-size:.8rem">${cat.emoji} ${cat.name}</span>
+      ${q.solved?'<span style="background:#ecfdf5;color:#059669;padding:4px 12px;border-radius:50px;font-size:.75rem;font-weight:700;border:1px solid #6ee7b7">✅ Solved</span>':''}
+    </div>
+    <div class="qd-title">${q.title}</div>
+    <div class="qd-body">${q.body||'No further details provided.'}</div>
+    <div class="qd-meta">
+      <div class="qd-vote-row">
+        <button class="vote-up ${q._myVote===1?'voted':''}" onclick="voteQD('${q.id}',1)" style="width:34px;height:34px">▲</button>
+        <span class="vote-count" id="qdVoteCount" style="font-size:1.2rem;font-weight:700;min-width:28px;text-align:center">${q.votes}</span>
+        <button class="vote-dn ${q._myVote===-1?'voted':''}" onclick="voteQD('${q.id}',-1)" style="width:34px;height:34px">▼</button>
+      </div>
+      <span class="q-author">
+        <span class="q-author-av" style="background:${rColor(q.author)};width:24px;height:24px">${q.author[0]}</span>
+        Asked by <strong>${q.author}</strong>
+      </span>
+      <span class="q-time">🕐 ${q.time}</span>
+    </div>`;
+
+  // render answers
+  const ansSect = document.getElementById('qdAnswers');
+  if(q.answers.length===0){
+    ansSect.innerHTML=`<div class="ans-section-title">💬 Answers <span>(0)</span></div>
+      <div class="empty-state" style="padding:36px 0"><div class="empty-icon">💭</div><h3>No answers yet</h3><p>Be the first to help ${q.author}!</p></div>`;
+    return;
+  }
+  const sorted = [...q.answers].sort((a,b)=>(b.best?1:0)-(a.best?1:0)||(b.votes-a.votes));
+  ansSect.innerHTML=`<div class="ans-section-title">💬 Answers <span>(${q.answers.length})</span></div>`
+    + sorted.map((a,i)=>`
+    <div class="ans-card ${a.best?'best':''}" style="animation-delay:${i*.05}s" id="anscard-${a.id}">
+      ${a.best?'<div class="best-badge">✅ Best Answer</div>':''}
+      <div class="ans-top">
+        <div class="ans-vote">
+          <button class="vote-up ${a._myVote===1?'voted':''}" onclick="voteA('${q.id}','${a.id}',1)" style="width:28px;height:28px;font-size:.75rem">▲</button>
+          <span class="ans-vote-count" id="av-${a.id}">${a.votes}</span>
+          <button class="vote-dn ${a._myVote===-1?'voted':''}" onclick="voteA('${q.id}','${a.id}',-1)" style="width:28px;height:28px;font-size:.75rem">▼</button>
+        </div>
+        <div class="ans-body-col">
+          <div class="ans-text">${a.text}</div>
+          <div class="ans-footer">
+            <div class="ans-meta">
+              <span class="ans-author-av" style="background:${rColor(a.author)}">${a.author[0]}</span>
+              <strong>${a.author}</strong>
+            </div>
+            ${!a.best?`<button class="mark-best-btn" onclick="markBest('${q.id}','${a.id}')">☑ Mark as Best</button>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function voteQD(qid, dir){
+  const q=S.questions.find(q=>q.id===qid);
+  if(q._myVote===dir){q.votes-=dir;q._myVote=0;}
+  else{q.votes+=q._myVote?dir*2:dir;q._myVote=dir;}
+  document.getElementById('qdVoteCount').textContent=q.votes;
+  // update vote buttons
+  q._myVote===1
+    ? (document.querySelectorAll(`#qdQuestion .vote-up`)[0].classList.add('voted'), document.querySelectorAll(`#qdQuestion .vote-dn`)[0].classList.remove('voted'))
+    : q._myVote===-1
+      ? (document.querySelectorAll(`#qdQuestion .vote-up`)[0].classList.remove('voted'), document.querySelectorAll(`#qdQuestion .vote-dn`)[0].classList.add('voted'))
+      : (document.querySelectorAll(`#qdQuestion .vote-up`)[0].classList.remove('voted'), document.querySelectorAll(`#qdQuestion .vote-dn`)[0].classList.remove('voted'));
+}
+
+function voteA(qid,aid,dir){
+  const q=S.questions.find(q=>q.id===qid);
+  const a=q.answers.find(a=>a.id===aid);
+  if(a._myVote===dir){a.votes-=dir;a._myVote=0;}
+  else{a.votes+=a._myVote?dir*2:dir;a._myVote=dir;}
+  document.getElementById('av-'+aid).textContent=a.votes;
+}
+
+function markBest(qid,aid){
+  const q=S.questions.find(q=>q.id===qid);
+  q.answers.forEach(a=>a.best=false);
+  const a=q.answers.find(a=>a.id===aid);
+  a.best=true; q.solved=true;
+  renderQuestionDetail(q);
+  showToast('Marked as best answer ✅','success');
+}
+
+/* ── Submit question ── */
+function openAskModal(){
+  populateSelect('qCat');
+  openModal('askModal');
+}
+
+function submitQuestion(){
+  const title = document.getElementById('qTitle').value.trim();
+  const body  = document.getElementById('qBody').value.trim();
+  const cat   = document.getElementById('qCat').value;
+  if(!title){ showToast('Please enter a question title','error'); return; }
+  const id = 'q'+Date.now();
+  S.questions.unshift({id, title, body, cat, author:'You', votes:0, answers:[], time:'Just now', solved:false});
+  document.getElementById('qTitle').value='';
+  document.getElementById('qBody').value='';
+  document.getElementById('qTitleCount').textContent='0/150';
+  document.getElementById('qBodyCount').textContent='0/800';
+  closeModal('askModal');
+  renderQAFilters(); filterQA(); updateQAStats();
+  showToast('Question posted! 🎉','success');
+}
+
+/* ── Submit answer ── */
+function submitAnswer(){
+  const text = document.getElementById('answerInput').value.trim();
+  if(!text){ showToast('Please write an answer first','error'); return; }
+  const q=S.questions.find(q=>q.id===S.activeQId);
+  q.answers.push({id:'a'+Date.now(), text, author:'You', votes:0, best:false});
+  document.getElementById('answerInput').value='';
+  document.getElementById('ansCharCount').textContent='0/1000';
+  renderQuestionDetail(q);
+  updateQAStats();
+  showToast('Answer posted! 🙌','success');
+}
+
+/* ══ SUPPORT SYSTEM ══════════════════════════════════ */
+
+const SP_CATS = [
+  {id:'course',   name:'Course Help',        icon:'📚', color:'#7c3aed', cc:'#ede9fe'},
+  {id:'roadmap',  name:'Roadmap Guidance',   icon:'🗺️', color:'#0369a1', cc:'#e0f2fe'},
+  {id:'technical',name:'Technical Issue',    icon:'🔧', color:'#dc2626', cc:'#fee2e2'},
+  {id:'account',  name:'Profile / Account',  icon:'👤', color:'#d97706', cc:'#fff8e6'},
+  {id:'billing',  name:'Billing / Payment',  icon:'💳', color:'#16a34a', cc:'#dcfce7'},
+  {id:'other',    name:'Other Query',         icon:'💬', color:'#9333ea', cc:'#f3e8ff'},
+];
+
+let spPriority = 'low';
+let spActiveCat = null;
+
+function initSupportPage(){
+  renderSpCatGrid();
+  renderMyTickets();
+  updateSpTicketCount();
+  // pre-fill name if returning user
+  if(!document.getElementById('spName').value){
+    document.getElementById('spName').value = 'Student';
+  }
+  // set live indicator randomly
+  const live = Math.random()>0.3;
+  const el = document.getElementById('liveStatus');
+  if(el) el.innerHTML = live ? '● Online now' : '● Back in 30 min';
+  if(el) el.style.color = live ? '#059669' : '#d97706';
+}
+
+function renderSpCatGrid(){
+  const grid = document.getElementById('spCatGrid');
+  if(!grid) return;
+  grid.innerHTML = SP_CATS.map(c=>`
+    <div class="sp-cat-card ${spActiveCat===c.id?'selected':''}" style="--cc:${c.color}"
+      onclick="selectSpCat('${c.id}')">
+      <div class="sp-cat-icon">${c.icon}</div>
+      <div class="sp-cat-name">${c.name}</div>
+    </div>`).join('');
+}
+
+function selectSpCat(id){
+  spActiveCat = spActiveCat===id ? null : id;
+  renderSpCatGrid();
+  // auto-fill the dropdown
+  const sel = document.getElementById('spCategory');
+  if(sel && spActiveCat) sel.value = spActiveCat;
+  // smooth scroll to form
+  if(spActiveCat) document.getElementById('spFormCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function spSetPriority(val, el){
+  spPriority = val;
+  document.querySelectorAll('.sp-priority-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function spClearErr(fieldId){
+  const el = document.getElementById(fieldId);
+  if(el) el.classList.remove('err');
+  const err = document.getElementById(fieldId+'Err');
+  if(err) err.classList.remove('show');
+}
+
+function spValidate(){
+  let valid = true;
+  const fields = [
+    {id:'spName',     check: v=>v.trim().length>=2,       errId:'spNameErr'},
+    {id:'spEmail',    check: v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()), errId:'spEmailErr'},
+    {id:'spCategory', check: v=>v!=='',                    errId:'spCategoryErr'},
+    {id:'spMessage',  check: v=>v.trim().length>=20,       errId:'spMessageErr'},
+  ];
+  fields.forEach(f=>{
+    const el = document.getElementById(f.id);
+    if(!f.check(el.value)){
+      el.classList.add('err');
+      document.getElementById(f.errId).classList.add('show');
+      valid = false;
+    }
+  });
+  if(!valid) document.getElementById('spFormCard').scrollIntoView({behavior:'smooth'});
+  return valid;
+}
+
+function submitSupportTicket(){
+  if(!spValidate()) return;
+
+  const btn = document.getElementById('spSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Submitting…';
+
+  // build ticket object
+  const ticketId = 'TKT-' + Date.now().toString().slice(-6);
+  const ticket = {
+    id: ticketId,
+    name:     document.getElementById('spName').value.trim(),
+    email:    document.getElementById('spEmail').value.trim(),
+    course:   document.getElementById('spCourse').value.trim() || 'Not specified',
+    category: document.getElementById('spCategory').value,
+    priority: spPriority,
+    message:  document.getElementById('spMessage').value.trim(),
+    status:   'open',
+    created:  new Date().toLocaleString(),
+  };
+
+  // save to localStorage
+  const tickets = spGetTickets();
+  tickets.unshift(ticket);
+  try{ localStorage.setItem('learnlab_tickets', JSON.stringify(tickets)); }
+  catch(e){ /* localStorage unavailable — in-memory only */ }
+
+  // simulate network delay
+  setTimeout(()=>{
+    btn.disabled = false;
+    btn.textContent = '🚀 Submit Support Request';
+
+    // show success
+    document.getElementById('spFormCard').style.display = 'none';
+    const succ = document.getElementById('spSuccess');
+    succ.classList.add('show');
+    document.getElementById('spTicketIdDisplay').textContent = ticketId;
+
+    // reset form
+    ['spName','spEmail','spCourse','spMessage'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.value='';
+    });
+    document.getElementById('spCategory').value = '';
+    document.getElementById('spMsgCount').textContent = '0/1200';
+    spActiveCat = null; spPriority = 'low';
+
+    renderMyTickets(); updateSpTicketCount();
+    showToast('Support ticket submitted! 🎉','success');
+  }, 1200);
+}
+
+function spSubmitAnother(){
+  document.getElementById('spFormCard').style.display = 'block';
+  document.getElementById('spSuccess').classList.remove('show');
+  document.getElementById('spName').value = 'Student';
+  renderSpCatGrid();
+}
+
+function spGetTickets(){
+  try{
+    return JSON.parse(localStorage.getItem('learnlab_tickets')||'[]');
+  }catch(e){ return []; }
+}
+
+function renderMyTickets(){
+  const list = document.getElementById('spTicketList');
+  const tickets = spGetTickets();
+  if(!list) return;
+  if(tickets.length===0){
+    list.innerHTML=`<div class="empty-state" style="padding:36px 0"><div class="empty-icon">🎫</div><h3 style="font-size:1.1rem">No tickets yet</h3><p>Submit your first support request above!</p></div>`;
+    return;
+  }
+  const catMap = {course:'📚',roadmap:'🗺️',technical:'🔧',account:'👤',billing:'💳',other:'💬'};
+  const priColor = {low:'#059669',medium:'#d97706',high:'#dc2626'};
+  // simulate some statuses for sample tickets
+  const statuses = ['open','progress','resolved'];
+  list.innerHTML = tickets.map((t,i)=>{
+    const status = t.status || statuses[i%3];
+    const stCls  = {open:'ts-open',progress:'ts-progress',resolved:'ts-resolved'}[status];
+    const stLbl  = {open:'🟡 Open',progress:'🔵 In Progress',resolved:'✅ Resolved'}[status];
+    const cat = SP_CATS.find(c=>c.id===t.category)||SP_CATS[5];
+    return `<div class="ticket-item">
+      <div class="ticket-icon" style="background:${cat.cc};color:${cat.color}">${catMap[t.category]||'💬'}</div>
+      <div class="ticket-info">
+        <div class="ticket-title">${t.course!=='Not specified'?t.course+' — ':''}${cat.name}</div>
+        <div class="ticket-meta">${t.id} · ${t.created} · Priority: <span style="color:${priColor[t.priority]||'#059669'};font-weight:600">${t.priority}</span></div>
+      </div>
+      <span class="ticket-status ${stCls}">${stLbl}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateSpTicketCount(){
+  const el = document.getElementById('spTicketCount');
+  if(!el) return;
+  const base = 1247;
+  el.textContent = (base + spGetTickets().length).toLocaleString();
+}
+
+function spContact(type){
+  const msgs = {
+    email:     ()=>{ window.location.href = ('https://mailto:pokerlover2001k@gmail.com?subject=LearnLab%20Support%20Request&body=Hi%2C%20I%20need%20help%20with%20LearnLab.'); showToast('Opening email client…',''); },
+    whatsapp:  ()=>{ window.location.href('https://wa.me/919000000000?text=Hi%2C%20I%20need%20help%20with%20LearnLab','_blank'); showToast('Opening WhatsApp…',''); },
+    community: ()=>{ showPage('qa'); showToast('Redirecting to Q&A Community…',''); },
+    live:      ()=>{ showToast('Live chat agent connecting… ⚡','success'); },
+  };
+  if(msgs[type]) msgs[type]();
+}
+
+function openSupportWithContext(){
+  // pre-fill course field from active category
+  showPage('support');
+  setTimeout(()=>{
+    if(S.activeCat){
+      const cat = getCat(S.activeCat);
+      const inp = document.getElementById('spCourse');
+      if(inp && !inp.value) inp.value = cat.name;
+      // auto-select Course Help category
+      const sel = document.getElementById('spCategory');
+      if(sel) sel.value = 'course';
+      spActiveCat = 'course';
+      renderSpCatGrid();
+    }
+    document.getElementById('spFormCard').scrollIntoView({behavior:'smooth'});
+  }, 300);
+}
+
+/* ── DARK MODE ───────────────────────────────────────── */
+function toggleDark(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',dark?'light':'dark');
+  const t=document.getElementById('darkToggle');
+  t.classList.toggle('on',!dark);
+  t.querySelector('.dark-toggle-knob').textContent=dark?'☀️':'🌙';
+}
+
+/* ── HELPERS ─────────────────────────────────────────── */
+function getCat(id){return CATS.find(c=>c.id===id)||CATS[0]}
+function rColor(seed){const p=['#7c5cbf','#ff7d6b','#3ecfb2','#f5a623','#4fb3f6','#f06292','#66bb6a'];let h=0;for(let c of seed)h=(h*31+c.charCodeAt(0))%p.length;return p[Math.abs(h)]}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+function populateAllSelects(){['newCat','editCat','gCat','qCat'].forEach(id=>populateSelect(id))}
+function populateSelect(id,selected){
+  const sel=document.getElementById(id);
+  if(!sel) return;
+  sel.innerHTML=CATS.map(c=>`<option value="${c.id}"${c.id===selected?' selected':''}>${c.emoji} ${c.name}</option>`).join('');
+}
+
+function showToast(msg,type){
+  const c=document.getElementById('toastCont');
+  const t=document.createElement('div');
+  t.className='toast '+(type||'');t.textContent=msg;c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(10px)';setTimeout(()=>t.remove(),400)},2600);
+}
+
+function buildEmojiPicker(containerId,stateKey){
+  const c=document.getElementById(containerId); if(!c) return;
+  c.innerHTML=ICONS.map(e=>`<div class="emoji-opt ${S[stateKey]===e?'selected':''}" onclick="pickEmoji('${e}','${containerId}','${stateKey}')">${e}</div>`).join('');
+}
+function pickEmoji(e,cid,sk){S[sk]=e;buildEmojiPicker(cid,sk)}
+
+function buildColorPicker(){
+  const c=document.getElementById('gColorPick'); if(!c) return;
+  c.innerHTML=GCOLORS.map(col=>`<div class="color-opt${S.gColor===col?' selected':''}" style="background:${col}" onclick="pickColor('${col}')"></div>`).join('');
+}
+function pickColor(col){S.gColor=col;buildColorPicker()}
+</script>
+</body>
+</html>
