@@ -11,20 +11,28 @@ const SP_CATS = [
 
 let spPriority = 'low';
 let spActiveCat = null;
+let spTickets = [];   // loaded from Supabase
 
 function initSupportPage(){
   renderSpCatGrid();
   renderMyTickets();
   updateSpTicketCount();
-  // pre-fill name if returning user
-  if(!document.getElementById('spName').value){
-    document.getElementById('spName').value = 'Student';
+  // pre-fill from the signed-in account
+  const profile = getProfile();
+  const user = getUser();
+  if(profile && !document.getElementById('spName').value){
+    document.getElementById('spName').value = profile.display_name;
   }
-  // set live indicator randomly
-  const live = Math.random()>0.3;
+  if(user && !document.getElementById('spEmail').value){
+    document.getElementById('spEmail').value = user.email || '';
+  }
   const el = document.getElementById('liveStatus');
-  if(el) el.innerHTML = live ? '● Online now' : '● Back in 30 min';
-  if(el) el.style.color = live ? '#059669' : '#d97706';
+  if(el){ el.innerHTML = '● Online now'; el.style.color = '#059669'; }
+  // refresh tickets from the server
+  window.db.loadTickets().then(tickets=>{
+    spTickets = tickets;
+    renderMyTickets(); updateSpTicketCount();
+  }).catch(err=>console.error('loadTickets failed', err));
 }
 
 function renderSpCatGrid(){
@@ -81,68 +89,68 @@ function spValidate(){
   return valid;
 }
 
-function submitSupportTicket(){
+async function submitSupportTicket(){
   if(!spValidate()) return;
 
   const btn = document.getElementById('spSubmitBtn');
   btn.disabled = true;
   btn.textContent = '⏳ Submitting…';
 
-  // build ticket object
-  const ticketId = 'TKT-' + Date.now().toString().slice(-6);
   const ticket = {
-    id: ticketId,
     name:     document.getElementById('spName').value.trim(),
     email:    document.getElementById('spEmail').value.trim(),
     course:   document.getElementById('spCourse').value.trim() || 'Not specified',
     category: document.getElementById('spCategory').value,
     priority: spPriority,
     message:  document.getElementById('spMessage').value.trim(),
-    status:   'open',
-    created:  new Date().toLocaleString(),
   };
 
-  // save to localStorage
-  const tickets = spGetTickets();
-  tickets.unshift(ticket);
-  try{ localStorage.setItem('learnlab_tickets', JSON.stringify(tickets)); }
-  catch(e){ /* localStorage unavailable — in-memory only */ }
-
-  // simulate network delay
-  setTimeout(()=>{
+  let ticketRef;
+  try{
+    ticketRef = await window.db.insertTicket(ticket);
+  }catch(err){
+    console.error('insertTicket failed', err);
     btn.disabled = false;
     btn.textContent = '🚀 Submit Support Request';
+    showToast('Could not submit ticket. Try again.','error');
+    return;
+  }
 
-    // show success
-    document.getElementById('spFormCard').style.display = 'none';
-    const succ = document.getElementById('spSuccess');
-    succ.classList.add('show');
-    document.getElementById('spTicketIdDisplay').textContent = ticketId;
+  spTickets.unshift({...ticket, id:ticketRef, status:'open', created:new Date().toLocaleString()});
 
-    // reset form
-    ['spName','spEmail','spCourse','spMessage'].forEach(id=>{
-      const el=document.getElementById(id); if(el) el.value='';
-    });
-    document.getElementById('spCategory').value = '';
-    document.getElementById('spMsgCount').textContent = '0/1200';
-    spActiveCat = null; spPriority = 'low';
+  btn.disabled = false;
+  btn.textContent = '🚀 Submit Support Request';
 
-    renderMyTickets(); updateSpTicketCount();
-    showToast('Support ticket submitted! 🎉','success');
-  }, 1200);
+  // show success
+  document.getElementById('spFormCard').style.display = 'none';
+  const succ = document.getElementById('spSuccess');
+  succ.classList.add('show');
+  document.getElementById('spTicketIdDisplay').textContent = ticketRef;
+
+  // reset form
+  ['spName','spEmail','spCourse','spMessage'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('spCategory').value = '';
+  document.getElementById('spMsgCount').textContent = '0/1200';
+  spActiveCat = null; spPriority = 'low';
+
+  renderMyTickets(); updateSpTicketCount();
+  showToast('Support ticket submitted! 🎉','success');
 }
 
 function spSubmitAnother(){
   document.getElementById('spFormCard').style.display = 'block';
   document.getElementById('spSuccess').classList.remove('show');
-  document.getElementById('spName').value = 'Student';
+  const profile = getProfile();
+  if(profile) document.getElementById('spName').value = profile.display_name;
+  const user = getUser();
+  if(user) document.getElementById('spEmail').value = user.email || '';
   renderSpCatGrid();
 }
 
 function spGetTickets(){
-  try{
-    return JSON.parse(localStorage.getItem('learnlab_tickets')||'[]');
-  }catch(e){ return []; }
+  return spTickets;
 }
 
 function renderMyTickets(){
@@ -155,10 +163,8 @@ function renderMyTickets(){
   }
   const catMap = {course:'📚',roadmap:'🗺️',technical:'🔧',account:'👤',billing:'💳',other:'💬'};
   const priColor = {low:'#059669',medium:'#d97706',high:'#dc2626'};
-  // simulate some statuses for sample tickets
-  const statuses = ['open','progress','resolved'];
   list.innerHTML = tickets.map((t,i)=>{
-    const status = t.status || statuses[i%3];
+    const status = t.status || 'open';
     const stCls  = {open:'ts-open',progress:'ts-progress',resolved:'ts-resolved'}[status];
     const stLbl  = {open:'🟡 Open',progress:'🔵 In Progress',resolved:'✅ Resolved'}[status];
     const cat = SP_CATS.find(c=>c.id===t.category)||SP_CATS[5];
@@ -182,8 +188,8 @@ function updateSpTicketCount(){
 
 function spContact(type){
   const msgs = {
-    email:     ()=>{ window.location.href = ('https://mailto:pokerlover2001k@gmail.com?subject=LearnLab%20Support%20Request&body=Hi%2C%20I%20need%20help%20with%20LearnLab.'); showToast('Opening email client…',''); },
-    whatsapp:  ()=>{ window.location.href('https://wa.me/919000000000?text=Hi%2C%20I%20need%20help%20with%20LearnLab','_blank'); showToast('Opening WhatsApp…',''); },
+    email:     ()=>{ window.location.href = 'mailto:pokerlover2001k@gmail.com?subject=LearnLab%20Support%20Request&body=Hi%2C%20I%20need%20help%20with%20LearnLab.'; showToast('Opening email client…',''); },
+    whatsapp:  ()=>{ window.open('https://wa.me/919000000000?text=Hi%2C%20I%20need%20help%20with%20LearnLab','_blank'); showToast('Opening WhatsApp…',''); },
     community: ()=>{ showPage('qa'); showToast('Redirecting to Q&A Community…',''); },
     live:      ()=>{ showToast('Live chat agent connecting… ⚡','success'); },
   };

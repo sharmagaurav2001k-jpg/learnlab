@@ -85,6 +85,10 @@ function voteQ(id, dir){
   if(q._myVote===dir){ q.votes-=dir; q._myVote=0; }
   else { q.votes += q._myVote?dir*2:dir; q._myVote=dir; }
   filterQA();
+  window.db.setQuestionVote(id, q._myVote).catch(err=>{
+    console.error('voteQ failed', err);
+    showToast('Could not save vote','error');
+  });
 }
 
 // Expose on window for inline event handlers and cross-module access

@@ -81,19 +81,7 @@ function sendInvite(){
   });
   document.getElementById('inviteInput').value = '';
   renderPendingList(g);
-  showToast(`Invite sent to ${val}! 🎉`,'success');
-
-  // simulate acceptance after random delay for realism
-  if(Math.random() > 0.4){
-    const inv = g.invites[g.invites.length-1];
-    setTimeout(()=>{
-      inv.status = 'accepted';
-      g.members.push(val.split(' ')[0].slice(0,6));
-      renderPendingList(g);
-      renderGroups();
-      showToast(`${val} accepted your invite! 🎊`,'success');
-    }, 4000 + Math.random()*4000);
-  }
+  showToast(`Invite sent to ${val}! Share the link so they can join 🎉`,'success');
 }
 
 function renderPendingList(g){

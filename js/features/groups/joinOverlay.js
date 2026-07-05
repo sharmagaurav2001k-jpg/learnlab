@@ -37,7 +37,12 @@ function confirmJoinFromLink(){
   if(!g) return;
   if(!g.joined){
     g.joined = true;
-    g.members.push('You');
+    g.members.push((getProfile().display_name||'L').charAt(0).toUpperCase());
+    window.db.joinGroupRow(g.id).catch(err=>{
+      console.error('join from link failed', err);
+      showToast('Could not join the group','error');
+      window.db.loadGroups().then(renderGroups);
+    });
   }
   document.getElementById('joinOverlay').classList.remove('open');
   showPage('groups');

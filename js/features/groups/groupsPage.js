@@ -1,4 +1,4 @@
-/* ── GROUPS ──────────────────────────────────────────── */
+/* ── GROUPS (persisted to Supabase) ──────────────────── */
 function renderGroups(){
   const grid=document.getElementById('groupsGrid');
   let groups=S.groups;
@@ -17,7 +17,7 @@ function renderGroups(){
       <div class="group-body">
         <div class="group-desc">${g.desc}</div>
         <div class="group-meta">
-          <div class="group-members"><div class="mavs">${avs}</div>${g.members.length} member${g.members.length>1?'s':''}</div>
+          <div class="group-members"><div class="mavs">${avs}</div>${g.members.length} member${g.members.length!==1?'s':''}</div>
           <div style="display:flex;gap:6px;align-items:center">
             ${g.joined?`<button class="invite-btn" onclick="event.stopPropagation();openInviteModal('${g.id}')">✉️ Invite</button>`:''}
             <button class="btn btn-sm ${g.joined?'btn-outline':'btn-primary'}" onclick="event.stopPropagation();joinGroup('${g.id}')">${g.joined?'✓ Joined':'Join'}</button>
@@ -34,10 +34,25 @@ function setGroupFilter(val,btn){
 }
 function joinGroup(id){
   const g=S.groups.find(g=>g.id===id);
+  const me=(getProfile().display_name||'L').charAt(0).toUpperCase();
   g.joined=!g.joined;
-  if(g.joined){g.members.push('You');showToast(`Joined "${g.name}"! 🎉`,'success');}
-  else{g.members=g.members.filter(m=>m!=='You');showToast(`Left "${g.name}"`,'');}
+  let op;
+  if(g.joined){
+    g.members.push(me);
+    op=window.db.joinGroupRow(id);
+    showToast(`Joined "${g.name}"! 🎉`,'success');
+  } else {
+    const idx=g.members.indexOf(me);
+    if(idx>-1) g.members.splice(idx,1);
+    op=window.db.leaveGroupRow(id);
+    showToast(`Left "${g.name}"`,'');
+  }
   renderGroups();
+  op.catch(err=>{
+    console.error('join/leave failed', err);
+    showToast('Could not update membership','error');
+    window.db.loadGroups().then(renderGroups);
+  });
 }
 
 // Expose on window for inline event handlers and cross-module access

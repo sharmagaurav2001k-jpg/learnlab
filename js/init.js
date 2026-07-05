@@ -1,5 +1,6 @@
 /* ── INIT ──────────────────────────────────────────── */
 import { getProfile } from './lib/auth.js';
+import { loadAllData } from './lib/db.js';
 
 async function initApp() {
   const user = await window.authReady;
@@ -11,15 +12,25 @@ async function initApp() {
     if(p.id==='page-discover') p.classList.add('active');
   });
   renderUserAvatar();
-  renderCatGrid();
   renderQuote();
   populateAllSelects();
   buildEmojiPicker('emojiPick','selEmoji');
   buildEmojiPicker('gEmojiPick','gEmoji');
   buildColorPicker();
   setInterval(renderQuote, 6000);
-  checkInviteHash();
   document.body.classList.add('auth-ready');
+
+  // load server data, then render data-driven sections
+  try {
+    await loadAllData();
+  } catch (err) {
+    console.error('Failed to load data', err);
+    showToast('Could not load your data. Please refresh.', 'error');
+  }
+  renderCatGrid();
+  renderMyLearning();
+  renderGroups();
+  checkInviteHash();
 }
 
 function renderUserAvatar() {

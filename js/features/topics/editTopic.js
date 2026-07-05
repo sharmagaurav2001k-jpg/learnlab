@@ -1,4 +1,4 @@
-/* ── EDIT TOPIC ──────────────────────────────────────── */
+/* ── EDIT TOPIC (persisted to Supabase) ─────────────── */
 function openEdit(id){
   const t=S.topics.find(t=>t.id===id);
   document.getElementById('editId').value=id;
@@ -20,6 +20,10 @@ function saveEdit(){
   renderMyLearning();
   renderCatGrid();
   showToast('Topic updated ✨','success');
+  window.db.saveTopic(t).catch(err=>{
+    console.error('saveTopic failed', err);
+    showToast('Could not save changes','error');
+  });
 }
 
 // Expose on window for inline event handlers and cross-module access

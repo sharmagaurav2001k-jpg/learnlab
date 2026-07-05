@@ -77,6 +77,10 @@ function voteQD(qid, dir){
   if(q._myVote===dir){q.votes-=dir;q._myVote=0;}
   else{q.votes+=q._myVote?dir*2:dir;q._myVote=dir;}
   document.getElementById('qdVoteCount').textContent=q.votes;
+  window.db.setQuestionVote(qid, q._myVote).catch(err=>{
+    console.error('voteQD failed', err);
+    showToast('Could not save vote','error');
+  });
   // update vote buttons
   q._myVote===1
     ? (document.querySelectorAll(`#qdQuestion .vote-up`)[0].classList.add('voted'), document.querySelectorAll(`#qdQuestion .vote-dn`)[0].classList.remove('voted'))
@@ -91,15 +95,28 @@ function voteA(qid,aid,dir){
   if(a._myVote===dir){a.votes-=dir;a._myVote=0;}
   else{a.votes+=a._myVote?dir*2:dir;a._myVote=dir;}
   document.getElementById('av-'+aid).textContent=a.votes;
+  window.db.setAnswerVote(aid, a._myVote).catch(err=>{
+    console.error('voteA failed', err);
+    showToast('Could not save vote','error');
+  });
 }
 
 function markBest(qid,aid){
   const q=S.questions.find(q=>q.id===qid);
+  // only the question author can mark the best answer (RLS enforces this too)
+  if(q.authorId && q.authorId!==getUser().id){
+    showToast('Only the question author can mark the best answer','error');
+    return;
+  }
   q.answers.forEach(a=>a.best=false);
   const a=q.answers.find(a=>a.id===aid);
   a.best=true; q.solved=true;
   renderQuestionDetail(q);
   showToast('Marked as best answer ✅','success');
+  window.db.markBestAnswer(qid,aid).catch(err=>{
+    console.error('markBest failed', err);
+    showToast('Could not save best answer','error');
+  });
 }
 
 // Expose on window for inline event handlers and cross-module access
