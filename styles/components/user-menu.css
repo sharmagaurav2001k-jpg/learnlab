@@ -1,0 +1,10 @@
+/* ── USER MENU ─────────────────────────────────── */
+body:not(.auth-ready) .app{visibility:hidden}
+.user-menu-wrap{position:relative}
+.user-menu-wrap .avatar{border:none;cursor:pointer;font-family:'Outfit',sans-serif}
+.user-menu{position:absolute;top:calc(100% + 10px);right:0;min-width:210px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);box-shadow:var(--shadow-md);padding:14px;display:none;z-index:300}
+.user-menu.open{display:block}
+.user-menu-name{font-weight:600;color:var(--ink);font-size:.92rem}
+.user-menu-email{font-size:.8rem;color:var(--ink3);margin:2px 0 12px;word-break:break-all}
+.user-menu-signout{width:100%;padding:9px;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--surface2);color:var(--coral);font-weight:600;font-size:.85rem;cursor:pointer;transition:var(--tr);font-family:'Outfit',sans-serif}
+.user-menu-signout:hover{background:rgba(255,125,107,.1);border-color:var(--coral)}

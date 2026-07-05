@@ -36,7 +36,14 @@
       <div class="dark-toggle-knob">☀️</div>
     </div>
     <button class="notif-btn">🔔</button>
-    <div class="avatar">S</div>
+    <div class="user-menu-wrap">
+      <button class="avatar" id="userAvatar" onclick="toggleUserMenu()" aria-label="Account menu">L</button>
+      <div class="user-menu" id="userMenu">
+        <div class="user-menu-name" id="userMenuName"></div>
+        <div class="user-menu-email" id="userMenuEmail"></div>
+        <button class="user-menu-signout" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
   </div>
 </nav>
 

@@ -1,5 +1,6 @@
 // LearnLab bootstrap — module import order matters:
-// data → state → features/utils → init (registers window.onload)
+// auth gate → data → state → features/utils → init
+import './lib/authGate.js';
 import './data/categories.js';
 import './data/topics.js';
 import './data/quotes.js';
@@ -25,6 +26,7 @@ import './features/qa/questionDetail.js';
 import './features/qa/askQuestion.js';
 import './features/support/supportPage.js';
 import './features/theme/themeToggle.js';
+import './features/user/userMenu.js';
 import './utils/helpers.js';
 import './utils/modal.js';
 import './utils/select.js';
