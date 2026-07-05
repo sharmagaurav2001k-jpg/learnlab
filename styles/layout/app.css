@@ -1,0 +1,17 @@
+/* ── BG ORBS ────────────────────────────────────── */
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.32;animation:drift 18s ease-in-out infinite alternate}
+[data-theme="dark"] .orb{opacity:.12}
+.o1{width:520px;height:520px;background:radial-gradient(circle,#c4a8ff,#7c5cbf);top:-160px;left:-120px;animation-delay:0s}
+.o2{width:420px;height:420px;background:radial-gradient(circle,#3ecfb2,#4fb3f6);top:35%;right:-160px;animation-delay:-7s}
+.o3{width:360px;height:360px;background:radial-gradient(circle,#ff7d6b,#f5a623);bottom:-100px;left:32%;animation-delay:-13s}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,28px) scale(1.08)}}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+.app{position:relative;z-index:1}
+
+
+/* ── PAGE SYSTEM ────────────────────────────────── */
+.page{display:none}
+.page.active{display:block;animation:fadeUp .38s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}

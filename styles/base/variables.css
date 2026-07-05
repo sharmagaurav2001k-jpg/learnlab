@@ -1,0 +1,24 @@
+/* ── TOKENS ─────────────────────────────────────── */
+:root{
+  --bg:#f0edfa; --bg2:#e8e4f7;
+  --surface:#ffffff; --surface2:#f9f8fe;
+  --border:#e2ddf5;
+  --ink:#1a1535; --ink2:#5b5480; --ink3:#9892b8;
+  --accent:#7c5cbf; --accent2:#a67ff0; --accent-bg:#f0eaff;
+  --coral:#ff7d6b; --mint:#3ecfb2; --gold:#f5a623; --sky:#4fb3f6; --rose:#f06292;
+  --shadow-sm:0 2px 8px rgba(100,80,180,.08);
+  --shadow-md:0 8px 32px rgba(100,80,180,.13);
+  --shadow-lg:0 20px 60px rgba(100,80,180,.18);
+  --r:18px; --rs:10px; --rp:50px;
+  --tr:all .28s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg:#0e0c1a; --bg2:#16132a;
+  --surface:#1e1a32; --surface2:#252040;
+  --border:#2e2850;
+  --ink:#f0eeff; --ink2:#b0a8d8; --ink3:#6d66a0;
+  --accent:#a67ff0; --accent2:#c4a8ff; --accent-bg:#2a2048;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.3);
+  --shadow-md:0 8px 32px rgba(0,0,0,.4);
+  --shadow-lg:0 20px 60px rgba(0,0,0,.5);
+}

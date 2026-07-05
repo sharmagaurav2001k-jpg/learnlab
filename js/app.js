@@ -1,0 +1,34 @@
+// LearnLab bootstrap — module import order matters:
+// data → state → features/utils → init (registers window.onload)
+import './data/categories.js';
+import './data/topics.js';
+import './data/quotes.js';
+import './data/icons.js';
+import './state/appState.js';
+import './features/discover/quoteRotator.js';
+import './features/groups/joinOverlay.js';
+import './router/pageRouter.js';
+import './features/discover/discoverPage.js';
+import './features/category/categoryPage.js';
+import './features/category/topicCard.js';
+import './features/topics/topicActions.js';
+import './features/discover/search.js';
+import './features/my-learning/myLearningPage.js';
+import './features/topics/addTopic.js';
+import './features/topics/editTopic.js';
+import './features/groups/groupsPage.js';
+import './features/chat/chatPanel.js';
+import './features/groups/createGroup.js';
+import './features/groups/inviteGroup.js';
+import './features/qa/qaPage.js';
+import './features/qa/questionDetail.js';
+import './features/qa/askQuestion.js';
+import './features/support/supportPage.js';
+import './features/theme/themeToggle.js';
+import './utils/helpers.js';
+import './utils/modal.js';
+import './utils/select.js';
+import './utils/toast.js';
+import './utils/emojiPicker.js';
+import './utils/colorPicker.js';
+import './init.js';

@@ -1,0 +1,16 @@
+/* ── MOBILE ─────────────────────────────────────── */
+@media(max-width:640px){
+  .navbar{padding:0 16px}
+  .nav-tabs{display:none}
+  .mobile-tabs{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);border-top:1px solid var(--border);padding:8px 0 16px}
+  .mobile-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.64rem;color:var(--ink3);padding:6px;transition:var(--tr);cursor:pointer}
+  .mobile-tab.active{color:var(--accent)}
+  .mobile-tab-icon{font-size:1.3rem}
+  .section,.cat-topics-area{padding-bottom:100px}
+  .chat-panel{width:100%}
+  .fab{bottom:88px}
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+  .cat-hero-card{padding:28px 24px}
+  .cat-hero-name{font-size:1.5rem}
+}
+@media(min-width:641px){.mobile-tabs{display:none}}
