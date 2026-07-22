@@ -1,0 +1,7 @@
+/* ── SECTION ────────────────────────────────────── */
+.section{max-width:1200px;margin:0 auto;padding:0 24px 60px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.section-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700}
+.section-title span{color:var(--accent)}
+.see-all{font-size:.85rem;font-weight:500;color:var(--accent);padding:6px 14px;border-radius:var(--rp);border:1.5px solid var(--accent);transition:var(--tr);cursor:pointer}
+.see-all:hover{background:var(--accent);color:white}

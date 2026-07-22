@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sign in — LearnLab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles/main.css"/>
+<link rel="stylesheet" href="styles/pages/auth.css"/>
+</head>
+<body>
+
+<div class="orbs">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+</div>
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">📚</div>
+      <span>LearnLab</span>
+    </div>
+
+    <!-- LOGIN -->
+    <section id="loginView">
+      <h1 class="auth-title">Welcome <span>back</span></h1>
+      <p class="auth-sub">Sign in to continue your learning journey.</p>
+      <form id="loginForm">
+        <div class="fg"><label class="fl" for="loginEmail">Email</label>
+          <input class="fi" id="loginEmail" type="email" autocomplete="email" required placeholder="you@example.com"/></div>
+        <div class="fg"><label class="fl" for="loginPassword">Password</label>
+          <input class="fi" id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••"/></div>
+        <div class="auth-error" id="loginError" role="alert"></div>
+        <button class="auth-btn" id="loginBtn" type="submit">Sign In</button>
+      </form>
+      <p class="auth-switch">New to LearnLab? <button type="button" onclick="switchView('signup')">Create an account</button></p>
+    </section>
+
+    <!-- SIGN UP -->
+    <section id="signupView" style="display:none">
+      <h1 class="auth-title">Create your <span>space</span></h1>
+      <p class="auth-sub">Join LearnLab and start mastering new skills.</p>
+      <form id="signupForm">
+        <div class="fg"><label class="fl" for="signupName">Display name</label>
+          <input class="fi" id="signupName" type="text" autocomplete="nickname" required maxlength="40" placeholder="e.g. Sam"/></div>
+        <div class="fg"><label class="fl" for="signupEmail">Email</label>
+          <input class="fi" id="signupEmail" type="email" autocomplete="email" required placeholder="you@example.com"/></div>
+        <div class="fg"><label class="fl" for="signupPassword">Password</label>
+          <input class="fi" id="signupPassword" type="password" autocomplete="new-password" required minlength="6" placeholder="At least 6 characters"/></div>
+        <div class="auth-error" id="signupError" role="alert"></div>
+        <button class="auth-btn" id="signupBtn" type="submit">Create Account</button>
+      </form>
+      <p class="auth-switch">Already have an account? <button type="button" onclick="switchView('login')">Sign in</button></p>
+    </section>
+
+    <!-- CONFIRM EMAIL -->
+    <section id="confirmView" style="display:none">
+      <h1 class="auth-title">Check your <span>inbox</span></h1>
+      <p class="auth-sub" id="confirmMsg">We sent a confirmation link to your email. Click it, then come back and sign in.</p>
+      <button class="auth-btn" type="button" onclick="switchView('login')">Back to Sign In</button>
+    </section>
+  </div>
+</main>
+
+<script type="module" src="js/auth-page.js"></script>
+</body>
+</html>

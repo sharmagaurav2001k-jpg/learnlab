@@ -1,0 +1,9 @@
+/* ── MY LEARNING PAGE ───────────────────────────── */
+.progress-section{background:var(--surface);border-radius:var(--r);padding:28px;border:1.5px solid var(--border);box-shadow:var(--shadow-sm);margin-bottom:32px}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.progress-percent{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--accent)}
+.progress-bar-wrap{background:var(--bg2);border-radius:var(--rp);height:10px;margin-bottom:20px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:var(--rp);background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s cubic-bezier(.4,0,.2,1)}
+.progress-stats{display:flex;gap:24px}
+.ps-num{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700}
+.ps-lbl{font-size:.75rem;color:var(--ink3)}

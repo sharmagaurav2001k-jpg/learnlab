@@ -1,0 +1,12 @@
+/* ── BUTTONS ────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:var(--rp);font-size:.9rem;font-weight:600;transition:var(--tr);cursor:pointer;border:none}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 4px 16px rgba(124,92,191,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,92,191,.4)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--ink2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:8px 16px;font-size:.82rem}
+
+
+/* ── FAB ────────────────────────────────────────── */
+.fab{position:fixed;bottom:32px;right:32px;z-index:50;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-size:1.5rem;box-shadow:var(--shadow-lg);display:grid;place-items:center;cursor:pointer;transition:var(--tr)}
+.fab:hover{transform:scale(1.1) rotate(90deg)}

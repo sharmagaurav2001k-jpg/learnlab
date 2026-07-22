@@ -1,0 +1,55 @@
+/* ── INVITE STYLES ──────────────────────────────── */
+.invite-link-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--rs);padding:10px 14px;margin-bottom:6px;
+}
+.invite-link-text{flex:1;font-size:.8rem;color:var(--ink2);word-break:break-all;font-family:monospace}
+.copy-btn{
+  flex-shrink:0;padding:6px 14px;border-radius:var(--rp);
+  background:var(--accent);color:white;font-size:.78rem;font-weight:600;
+  cursor:pointer;transition:var(--tr);border:none;white-space:nowrap;
+}
+.copy-btn:hover{background:var(--accent2)}
+.copy-btn.copied{background:#059669}
+.share-row{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.share-btn{
+  flex:1;min-width:100px;padding:9px 12px;border-radius:var(--rs);
+  border:1.5px solid var(--border);background:var(--surface2);
+  font-size:.8rem;font-weight:600;color:var(--ink2);
+  cursor:pointer;transition:var(--tr);display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.share-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.share-btn.whatsapp:hover{border-color:#25d366;color:#25d366;background:#f0fdf4}
+.share-btn.email-s:hover{border-color:#4fb3f6;color:#0369a1;background:#f0f9ff}
+.share-btn.twitter:hover{border-color:#1da1f2;color:#1da1f2;background:#eff9ff}
+.divider-text{text-align:center;font-size:.76rem;color:var(--ink3);margin:14px 0;position:relative}
+.divider-text::before,.divider-text::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border)}
+.divider-text::before{left:0}
+.divider-text::after{right:0}
+.invite-input-row{display:flex;gap:8px}
+.invite-input-row .fi{flex:1}
+.pending-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;max-height:180px;overflow-y:auto}
+.pending-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-radius:var(--rs);
+  background:var(--surface2);border:1px solid var(--border);
+}
+.pending-av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;color:white;font-weight:700;flex-shrink:0}
+.pending-info{flex:1}
+.pending-name{font-size:.88rem;font-weight:600}
+.pending-status{font-size:.72rem;color:var(--ink3);margin-top:1px}
+.pending-badge{padding:4px 10px;border-radius:var(--rp);font-size:.7rem;font-weight:600}
+.badge-pending{background:#fff8e6;color:#d97706;border:1px solid #fcd34d}
+.badge-accepted{background:#ecfdf5;color:#059669;border:1px solid #6ee7b7}
+[data-theme="dark"] .badge-pending{background:#2a1f00;color:#fcd34d}
+[data-theme="dark"] .badge-accepted{background:#002a1a;color:#6ee7b7}
+/* invite button on group card */
+.invite-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:var(--rp);
+  background:var(--accent-bg);color:var(--accent);
+  border:1.5px solid var(--accent);font-size:.75rem;font-weight:600;
+  cursor:pointer;transition:var(--tr);
+}
+.invite-btn:hover{background:var(--accent);color:white}

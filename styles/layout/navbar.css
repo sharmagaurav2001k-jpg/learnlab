@@ -1,0 +1,23 @@
+/* ── NAVBAR ─────────────────────────────────────── */
+.navbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:68px;
+  background:rgba(255,255,255,.78);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);transition:var(--tr);
+}
+[data-theme="dark"] .navbar{background:rgba(14,12,26,.82)}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--accent);cursor:pointer}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:1.1rem}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{padding:8px 18px;border-radius:var(--rp);font-size:.88rem;font-weight:500;color:var(--ink2);transition:var(--tr)}
+.nav-tab:hover{background:var(--accent-bg);color:var(--accent)}
+.nav-tab.active{background:var(--accent);color:#fff}
+.nav-right{display:flex;align-items:center;gap:12px}
+.dark-toggle{width:44px;height:24px;border-radius:12px;background:var(--border);position:relative;cursor:pointer;transition:var(--tr)}
+.dark-toggle.on{background:var(--accent)}
+.dark-toggle-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:white;transition:var(--tr);display:grid;place-items:center;font-size:.6rem}
+.dark-toggle.on .dark-toggle-knob{left:23px}
+.notif-btn{width:38px;height:38px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;font-size:1rem;color:var(--ink2);transition:var(--tr)}
+.notif-btn:hover{background:var(--accent-bg);color:var(--accent)}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--coral));display:grid;place-items:center;font-size:.9rem;color:white;font-weight:600}

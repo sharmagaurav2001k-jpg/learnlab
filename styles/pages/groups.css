@@ -1,0 +1,13 @@
+/* ── STUDY GROUPS ───────────────────────────────── */
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.group-card{background:var(--surface);border-radius:var(--r);border:1.5px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;transition:var(--tr);cursor:pointer;animation:fadeUp .4s both}
+.group-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.group-banner{height:80px;display:flex;align-items:center;padding:0 20px;gap:12px}
+.group-banner-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:white}
+.group-body{padding:18px 20px}
+.group-desc{font-size:.84rem;color:var(--ink2);line-height:1.6;margin-bottom:14px}
+.group-meta{display:flex;align-items:center;justify-content:space-between}
+.group-members{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--ink3)}
+.mavs{display:flex}
+.mav{width:26px;height:26px;border-radius:50%;border:2px solid var(--surface);display:grid;place-items:center;font-size:.6rem;color:white;font-weight:700;margin-left:-8px}
+.mav:first-child{margin-left:0}
